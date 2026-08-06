@@ -1,8 +1,10 @@
 import os
+import json
+import shutil
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QLabel, QFileDialog, QListWidget, QListWidgetItem, QComboBox,
-    QGroupBox, QFormLayout, QMessageBox
+    QGroupBox, QFormLayout, QMessageBox, QCheckBox
 )
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QIcon, QPixmap
@@ -71,6 +73,9 @@ class OpenMarsApp(QMainWindow):
         # UI Setup
         self.setup_ui()
         
+        # Cargar configuración previa
+        self.load_config()
+        
         # Iniciar Hilos
         self.usb_worker.start()
         self.media_worker.start()
@@ -132,8 +137,12 @@ class OpenMarsApp(QMainWindow):
         self.cb_scale.addItems(["Recortar (Mantener Proporción)", "Aplastar (Estirar a 480x480)"])
         self.cb_scale.currentIndexChanged.connect(self.update_transform)
         
+        self.chk_autostart = QCheckBox("Iniciar automáticamente con el PC")
+        self.chk_autostart.stateChanged.connect(self.toggle_autostart)
+        
         form.addRow("Rotación:", self.cb_rotation)
         form.addRow("Modo Escala:", self.cb_scale)
+        form.addRow("", self.chk_autostart)
         right_panel.addWidget(group_controls)
         
         # Estado
@@ -206,6 +215,66 @@ class OpenMarsApp(QMainWindow):
             self.lbl_status.setStyleSheet("color: #4caf50; font-weight: bold; padding-top: 10px;")
 
     def closeEvent(self, event):
+        self.save_config()
         self.usb_worker.stop()
         self.media_worker.stop()
         event.accept()
+
+    def get_autostart_path(self):
+        return os.path.expanduser("~/.config/autostart/open-screen-mars.desktop")
+
+    def toggle_autostart(self, state):
+        autostart_file = self.get_autostart_path()
+        if state == Qt.Checked.value:
+            # Crear directorio si no existe
+            os.makedirs(os.path.dirname(autostart_file), exist_ok=True)
+            
+            # Generar contenido del .desktop
+            app_dir = os.path.dirname(os.path.abspath(__file__))
+            desktop_content = f"""[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Open Screen for Mars Gaming
+Comment=Controlador nativo para pantallas LCD Mars Gaming (MS9132)
+Exec={app_dir}/run.sh
+Icon=utilities-system-monitor
+Terminal=false
+Categories=Utility;HardwareSettings;
+"""
+            with open(autostart_file, 'w') as f:
+                f.write(desktop_content)
+            os.chmod(autostart_file, 0o755)
+        else:
+            if os.path.exists(autostart_file):
+                os.remove(autostart_file)
+
+    def save_config(self):
+        config = {
+            'rotation': self.cb_rotation.currentIndex(),
+            'scale': self.cb_scale.currentIndex(),
+            'autostart': self.chk_autostart.isChecked(),
+            'last_media': self.media_worker.media_path
+        }
+        with open('config.json', 'w') as f:
+            json.dump(config, f)
+
+    def load_config(self):
+        if os.path.exists('config.json'):
+            try:
+                with open('config.json', 'r') as f:
+                    config = json.load(f)
+                    
+                self.cb_rotation.setCurrentIndex(config.get('rotation', 0))
+                self.cb_scale.setCurrentIndex(config.get('scale', 0))
+                
+                autostart = config.get('autostart', False)
+                self.chk_autostart.setChecked(autostart)
+                # Verificar sincronización con el sistema real
+                if autostart and not os.path.exists(self.get_autostart_path()):
+                    self.toggle_autostart(Qt.Checked.value)
+                
+                last_media = config.get('last_media', None)
+                if last_media:
+                    self.media_worker.load_media(last_media)
+            except Exception as e:
+                print(f"Error cargando config: {e}")
