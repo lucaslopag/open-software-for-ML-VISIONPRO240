@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (
     QLabel, QFileDialog, QListWidget, QListWidgetItem, QComboBox,
     QGroupBox, QFormLayout, QMessageBox, QCheckBox
 )
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, QFileSystemWatcher
 from PySide6.QtGui import QIcon, QPixmap
 
 from usb_worker import UsbWorker
@@ -17,6 +17,10 @@ class OpenMarsApp(QMainWindow):
         super().__init__()
         self.setWindowTitle("Open Screen for Mars Gaming")
         self.setMinimumSize(900, 600)
+        
+        self.current_folder = None
+        self.watcher = QFileSystemWatcher(self)
+        self.watcher.directoryChanged.connect(self.refresh_directory)
         
         # Tema Oscuro Básico
         self.setStyleSheet("""
@@ -164,22 +168,50 @@ class OpenMarsApp(QMainWindow):
     def open_directory(self):
         folder = QFileDialog.getExistingDirectory(self, "Seleccionar Carpeta")
         if folder:
-            self.gallery.clear()
-            valid_exts = ('.jpg', '.jpeg', '.png', '.bmp', '.gif', '.mp4', '.avi', '.mkv', '.webm')
-            for f in sorted(os.listdir(folder)):
-                if f.lower().endswith(valid_exts):
-                    path = os.path.join(folder, f)
-                    item = QListWidgetItem(f)
-                    item.setData(Qt.UserRole, path)
+            self.load_directory(folder)
+
+    def load_directory(self, folder):
+        if not os.path.exists(folder):
+            return
+            
+        if self.current_folder:
+            self.watcher.removePath(self.current_folder)
+            
+        self.current_folder = folder
+        self.watcher.addPath(folder)
+        self.refresh_directory()
+
+    def refresh_directory(self):
+        if not self.current_folder or not os.path.exists(self.current_folder):
+            return
+            
+        # Guardar selección actual si existe
+        current_selection = None
+        if self.gallery.currentItem():
+            current_selection = self.gallery.currentItem().data(Qt.UserRole)
+            
+        self.gallery.clear()
+        valid_exts = ('.jpg', '.jpeg', '.png', '.bmp', '.gif', '.mp4', '.avi', '.mkv', '.webm')
+        
+        item_to_select = None
+        for f in sorted(os.listdir(self.current_folder)):
+            if f.lower().endswith(valid_exts):
+                path = os.path.join(self.current_folder, f)
+                item = QListWidgetItem(f)
+                item.setData(Qt.UserRole, path)
+                
+                if not f.lower().endswith(('.mp4', '.avi', '.mkv', '.webm')):
+                    try:
+                        pixmap = QPixmap(path).scaled(100, 100, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                        item.setIcon(QIcon(pixmap))
+                    except: pass
+                
+                self.gallery.addItem(item)
+                if current_selection == path:
+                    item_to_select = item
                     
-                    # Intentar crear un icono de previsualización rápido para la galería
-                    if not f.lower().endswith(('.mp4', '.avi', '.mkv', '.webm')):
-                        try:
-                            pixmap = QPixmap(path).scaled(100, 100, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-                            item.setIcon(QIcon(pixmap))
-                        except: pass
-                    
-                    self.gallery.addItem(item)
+        if item_to_select:
+            self.gallery.setCurrentItem(item_to_select)
 
     def show_obs_info(self):
         QMessageBox.information(self, "Cómo usar la Cámara Virtual",
@@ -253,7 +285,8 @@ Categories=Utility;HardwareSettings;
             'rotation': self.cb_rotation.currentIndex(),
             'scale': self.cb_scale.currentIndex(),
             'autostart': self.chk_autostart.isChecked(),
-            'last_media': self.media_worker.media_path
+            'last_media': self.media_worker.media_path,
+            'last_directory': self.current_folder
         }
         with open('config.json', 'w') as f:
             json.dump(config, f)
@@ -269,9 +302,12 @@ Categories=Utility;HardwareSettings;
                 
                 autostart = config.get('autostart', False)
                 self.chk_autostart.setChecked(autostart)
-                # Verificar sincronización con el sistema real
                 if autostart and not os.path.exists(self.get_autostart_path()):
                     self.toggle_autostart(Qt.Checked.value)
+                    
+                last_dir = config.get('last_directory', None)
+                if last_dir:
+                    self.load_directory(last_dir)
                 
                 last_media = config.get('last_media', None)
                 if last_media:
