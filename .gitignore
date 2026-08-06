@@ -1,0 +1,6 @@
+venv/
+__pycache__/
+*.pyc
+*.json
+*.img
+setup_usb_permissions.sh
