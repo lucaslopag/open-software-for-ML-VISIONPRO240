@@ -4,10 +4,10 @@ import shutil
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QLabel, QFileDialog, QListWidget, QListWidgetItem, QComboBox,
-    QGroupBox, QFormLayout, QMessageBox, QCheckBox
+    QGroupBox, QFormLayout, QMessageBox, QCheckBox, QSystemTrayIcon, QMenu, QApplication
 )
 from PySide6.QtCore import Qt, QSize, QFileSystemWatcher
-from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtGui import QIcon, QPixmap, QAction
 
 from usb_worker import UsbWorker
 from media_worker import MediaWorker
@@ -157,6 +157,22 @@ class OpenMarsApp(QMainWindow):
         # Layout principal
         main_layout.addLayout(left_panel, stretch=1)
         main_layout.addLayout(right_panel, stretch=0)
+        
+        # Icono de Bandeja del Sistema
+        self.tray_icon = QSystemTrayIcon(self)
+        self.tray_icon.setIcon(QIcon.fromTheme("utilities-system-monitor"))
+        
+        tray_menu = QMenu()
+        show_action = QAction("Mostrar", self)
+        show_action.triggered.connect(self.showNormal)
+        quit_action = QAction("Salir", self)
+        quit_action.triggered.connect(self.quit_app)
+        
+        tray_menu.addAction(show_action)
+        tray_menu.addAction(quit_action)
+        self.tray_icon.setContextMenu(tray_menu)
+        self.tray_icon.activated.connect(self.tray_activated)
+        self.tray_icon.show()
 
     def update_transform(self):
         rot_str = self.cb_rotation.currentText().replace("º", "")
@@ -246,11 +262,25 @@ class OpenMarsApp(QMainWindow):
         else:
             self.lbl_status.setStyleSheet("color: #4caf50; font-weight: bold; padding-top: 10px;")
 
+    def tray_activated(self, reason):
+        if reason == QSystemTrayIcon.DoubleClick:
+            self.showNormal()
+
     def closeEvent(self, event):
+        event.ignore()
+        self.hide()
+        self.tray_icon.showMessage(
+            "Open Mars Gaming Screens",
+            "La aplicación sigue ejecutándose en segundo plano.",
+            QSystemTrayIcon.Information,
+            2000
+        )
+
+    def quit_app(self):
         self.save_config()
         self.usb_worker.stop()
         self.media_worker.stop()
-        event.accept()
+        QApplication.quit()
 
     def get_autostart_path(self):
         return os.path.expanduser("~/.config/autostart/open-screen-mars.desktop")
