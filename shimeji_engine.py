@@ -14,9 +14,9 @@ class ShimejiEngine:
         
         # Load sprites
         self.sprites = {
-            'idle': self.load_spritesheet('idle.png', 'idle.json'),
-            'walk_left': self.load_spritesheet('walk_left.png', 'walk.json'),
-            'walk_right': self.load_spritesheet('walk_right.png', 'walk.json')
+            'idle': self.load_asset('idle', 'idle.png', 'idle.json'),
+            'walk_left': self.load_asset('walk_left', 'walk_left.png', 'walk.json'),
+            'walk_right': self.load_asset('walk_right', 'walk_right.png', 'walk.json')
         }
         
         # Upscale sprites by 2x for the 480x480 screen so it's not too tiny
@@ -36,6 +36,19 @@ class ShimejiEngine:
         self.vx = 0
         
         self.state_timer = 60
+
+    def load_asset(self, name, default_png, default_json):
+        gif_path = os.path.join(self.assets_dir, f"{name}.gif")
+        if os.path.exists(gif_path):
+            from PIL import ImageSequence
+            img = Image.open(gif_path)
+            frames = []
+            for frame in ImageSequence.Iterator(img):
+                f = frame.copy().convert('RGBA')
+                frames.append(f)
+            return frames if frames else [Image.new('RGBA', (64, 100), (255, 0, 0, 255))]
+            
+        return self.load_spritesheet(default_png, default_json)
 
     def load_spritesheet(self, image_file, json_file):
         img_path = os.path.join(self.assets_dir, image_file)
