@@ -61,7 +61,7 @@ class MediaWorker(QThread):
         self.running = True
         
         while self.running:
-            if not self.media_path or (self.media_path != 'OBS_CAMERA' and not os.path.exists(self.media_path)):
+            if not self.media_path or (self.media_path != 'OBS_CAMERA' and not self.media_path.startswith('http') and not os.path.exists(self.media_path)):
                 time.sleep(0.1)
                 continue
                 
@@ -97,17 +97,23 @@ class MediaWorker(QThread):
                     time.sleep(max(0, interval - elapsed))
                 cap.release()
                 
-            # --- VIDEO MP4/AVI ---
-            elif path.lower().endswith(('.mp4', '.avi', '.mkv', '.mov', '.webm')):
+            # --- VIDEO MP4/AVI O CÁMARA IP (HTTP) ---
+            elif path.lower().endswith(('.mp4', '.avi', '.mkv', '.mov', '.webm')) or path.startswith('http'):
                 cap = cv2.VideoCapture(path)
                 fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
+                if fps <= 0: fps = 30.0
                 interval = 1.0 / fps
                 
                 while self.running and self.media_path == path:
                     start_time = time.time()
                     ret, frame = cap.read()
                     if not ret:
-                        cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                        if path.startswith('http'):
+                            time.sleep(1)
+                            cap.release()
+                            cap = cv2.VideoCapture(path)
+                        else:
+                            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
                         continue
                         
                     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

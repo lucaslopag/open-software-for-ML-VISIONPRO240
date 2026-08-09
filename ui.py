@@ -4,7 +4,7 @@ import shutil
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QLabel, QFileDialog, QListWidget, QListWidgetItem, QComboBox,
-    QGroupBox, QFormLayout, QMessageBox, QCheckBox, QSystemTrayIcon, QMenu, QApplication
+    QGroupBox, QFormLayout, QMessageBox, QCheckBox, QSystemTrayIcon, QMenu, QApplication, QInputDialog
 )
 from PySide6.QtCore import Qt, QSize, QFileSystemWatcher
 from PySide6.QtGui import QIcon, QPixmap, QAction
@@ -109,6 +109,20 @@ class OpenMarsApp(QMainWindow):
         obs_layout.addWidget(btn_camera)
         obs_layout.addWidget(btn_info)
         left_panel.addLayout(obs_layout)
+        
+        ipcam_layout = QHBoxLayout()
+        btn_ipcam = QPushButton("📱 Conectar a Cámara IP (Móvil)")
+        btn_ipcam.setStyleSheet("background-color: #f57c00;") # Naranja
+        btn_ipcam.clicked.connect(self.on_ipcam_selected)
+        
+        btn_info_ipcam = QPushButton("ℹ️")
+        btn_info_ipcam.setStyleSheet("background-color: #555; font-size: 16px; padding: 4px;")
+        btn_info_ipcam.setFixedWidth(40)
+        btn_info_ipcam.clicked.connect(self.show_ipcam_info)
+        
+        ipcam_layout.addWidget(btn_ipcam)
+        ipcam_layout.addWidget(btn_info_ipcam)
+        left_panel.addLayout(ipcam_layout)
         
         self.gallery = QListWidget()
         self.gallery.setViewMode(QListWidget.IconMode)
@@ -242,6 +256,24 @@ class OpenMarsApp(QMainWindow):
             "La pantalla mostrará instantáneamente tu OBS a 30 FPS. Si ves la imagen distorsionada, asegúrate "
             "de que la resolución de salida en los ajustes de OBS sea cuadrada (ej. 480x480 o 1080x1080)."
         )
+
+    def show_ipcam_info(self):
+        QMessageBox.information(self, "Transmitir desde el Móvil",
+            "Puedes usar la cámara de tu móvil para emitir en directo a la pantalla.\n\n"
+            "Instrucciones:\n"
+            "1. Instala una aplicación de cámara IP en tu móvil (ej. 'IP Webcam' en Android).\n"
+            "2. Conecta el móvil a la misma red WiFi que tu ordenador.\n"
+            "3. Abre la app en el móvil y dale a Iniciar Servidor.\n"
+            "4. Te dará una URL (ej. http://192.168.1.50:8080/video).\n"
+            "5. Pulsa el botón naranja aquí y escribe esa URL.\n\n"
+            "¡Verás la cámara de tu teléfono en la pantalla en tiempo real!"
+        )
+
+    def on_ipcam_selected(self):
+        url, ok = QInputDialog.getText(self, "Cámara IP", "Introduce la URL de tu cámara (ej. http://192.168.1.50:8080/video):")
+        if ok and url:
+            self.gallery.clearSelection()
+            self.media_worker.load_media(url)
 
     def on_camera_selected(self):
         self.gallery.clearSelection()
