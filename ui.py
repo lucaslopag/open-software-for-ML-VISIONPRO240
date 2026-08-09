@@ -125,7 +125,7 @@ class OpenMarsApp(QMainWindow):
         left_panel.addLayout(ipcam_layout)
         
         pet_layout = QHBoxLayout()
-        btn_pet = QPushButton("👾 Iniciar Mascota Virtual (Cyber-Slime)")
+        btn_pet = QPushButton("👾 Iniciar Shimeji (Miku)")
         btn_pet.setStyleSheet("background-color: #8e24aa;") # Purple
         btn_pet.clicked.connect(self.on_pet_selected)
         
@@ -291,11 +291,11 @@ class OpenMarsApp(QMainWindow):
 
     def show_pet_info(self):
         QMessageBox.information(self, "Mascota Virtual",
-            "¡El Cyber-Slime es un ente digital procedural que vive en tu pantalla!\n\n"
-            "- Se mueve de forma fluida rebotando en los bordes curvos de la pantalla.\n"
-            "- Parpadea y mira en la dirección a la que se dirige.\n"
-            "- Está sincronizado con tu PC: si es de noche (de 23:00 a 07:00), se irá a dormir al fondo del disipador.\n\n"
-            "Todo está renderizado en tiempo real a 30 FPS en segundo plano por Python sin apenas usar recursos."
+            "¡Acabas de invocar a Hatsune Miku en tu refrigeración líquida!\n\n"
+            "- Se pasea de forma autónoma por la pantalla de izquierda a derecha.\n"
+            "- Descansa de forma aleatoria (modo Idle).\n"
+            "- Utiliza sprites reales extraídos de proyectos Shimeji.\n\n"
+            "Todo está renderizado en tiempo real a 30 FPS en segundo plano por Python sin usar apenas CPU/RAM."
         )
 
     def on_pet_selected(self):

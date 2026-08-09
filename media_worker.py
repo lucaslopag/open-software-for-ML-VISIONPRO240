@@ -4,7 +4,7 @@ import cv2
 from PIL import Image, ImageOps, ImageSequence
 from PySide6.QtCore import QThread, Signal
 from PySide6.QtGui import QImage
-import pet_engine
+import shimeji_engine
 
 FRAME_SIZE = 8 + 480 * 480 * 3 + 8
 CABECERA   = b'\xff\x00\x00\x00\x00\x1e\x01\xe0'
@@ -70,7 +70,7 @@ class MediaWorker(QThread):
             
             # --- MASCOTA VIRTUAL ---
             if path == 'VIRTUAL_PET':
-                engine = pet_engine.PetEngine(fps=30)
+                engine = shimeji_engine.ShimejiEngine(fps=30)
                 engine.start()
                 interval = 1.0 / 30.0
                 
