@@ -124,6 +124,20 @@ class OpenMarsApp(QMainWindow):
         ipcam_layout.addWidget(btn_info_ipcam)
         left_panel.addLayout(ipcam_layout)
         
+        pet_layout = QHBoxLayout()
+        btn_pet = QPushButton("👾 Iniciar Mascota Virtual (Cyber-Slime)")
+        btn_pet.setStyleSheet("background-color: #8e24aa;") # Purple
+        btn_pet.clicked.connect(self.on_pet_selected)
+        
+        btn_info_pet = QPushButton("ℹ️")
+        btn_info_pet.setStyleSheet("background-color: #555; font-size: 16px; padding: 4px;")
+        btn_info_pet.setFixedWidth(40)
+        btn_info_pet.clicked.connect(self.show_pet_info)
+        
+        pet_layout.addWidget(btn_pet)
+        pet_layout.addWidget(btn_info_pet)
+        left_panel.addLayout(pet_layout)
+        
         self.gallery = QListWidget()
         self.gallery.setViewMode(QListWidget.IconMode)
         self.gallery.setIconSize(QSize(100, 100))
@@ -274,6 +288,19 @@ class OpenMarsApp(QMainWindow):
         if ok and url:
             self.gallery.clearSelection()
             self.media_worker.load_media(url)
+
+    def show_pet_info(self):
+        QMessageBox.information(self, "Mascota Virtual",
+            "¡El Cyber-Slime es un ente digital procedural que vive en tu pantalla!\n\n"
+            "- Se mueve de forma fluida rebotando en los bordes curvos de la pantalla.\n"
+            "- Parpadea y mira en la dirección a la que se dirige.\n"
+            "- Está sincronizado con tu PC: si es de noche (de 23:00 a 07:00), se irá a dormir al fondo del disipador.\n\n"
+            "Todo está renderizado en tiempo real a 30 FPS en segundo plano por Python sin apenas usar recursos."
+        )
+
+    def on_pet_selected(self):
+        self.gallery.clearSelection()
+        self.media_worker.load_media('VIRTUAL_PET')
 
     def on_camera_selected(self):
         self.gallery.clearSelection()
