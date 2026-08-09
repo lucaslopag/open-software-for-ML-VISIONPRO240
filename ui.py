@@ -146,6 +146,20 @@ class OpenMarsApp(QMainWindow):
         stream_layout.addWidget(btn_stream)
         left_panel.addLayout(stream_layout)
         
+        terraria_layout = QHBoxLayout()
+        btn_terraria = QPushButton("🌲 Terraria IA (Cero Consumo)")
+        btn_terraria.setStyleSheet("background-color: #2e7d32;") # Green
+        btn_terraria.clicked.connect(self.on_terraria_selected)
+        
+        btn_info_terraria = QPushButton("ℹ️")
+        btn_info_terraria.setStyleSheet("background-color: #555; font-size: 16px; padding: 4px;")
+        btn_info_terraria.setFixedWidth(40)
+        btn_info_terraria.clicked.connect(self.show_terraria_info)
+        
+        terraria_layout.addWidget(btn_terraria)
+        terraria_layout.addWidget(btn_info_terraria)
+        left_panel.addLayout(terraria_layout)
+        
         self.gallery = QListWidget()
         self.gallery.setViewMode(QListWidget.IconMode)
         self.gallery.setIconSize(QSize(100, 100))
@@ -306,9 +320,23 @@ class OpenMarsApp(QMainWindow):
             "Todo está renderizado en tiempo real a 30 FPS en segundo plano por Python sin usar apenas CPU/RAM."
         )
 
+    def show_terraria_info(self):
+        QMessageBox.information(self, "Terraria IA",
+            "¡Una simulación autónoma de Terraria hiper-optimizada!\n\n"
+            "- Un pequeño jugador recorre un mundo procedural 2D.\n"
+            "- Rompe bloques de tierra, piedra y madera con su pico.\n"
+            "- Las físicas y la gravedad están simuladas.\n"
+            "- Consumo: ~50MB de RAM, 0% de GPU y casi nada de CPU.\n\n"
+            "¡Una IA viviendo en tu pantalla sin calentar tu PC en absoluto!"
+        )
+
     def on_pet_selected(self):
         self.gallery.clearSelection()
         self.media_worker.load_media('VIRTUAL_PET')
+        
+    def on_terraria_selected(self):
+        self.gallery.clearSelection()
+        self.media_worker.load_media('TERRARIA_AI')
         
     def on_stream_selected(self):
         url, ok = QInputDialog.getText(self, "Directo (Twitch/YouTube)", "Introduce la URL del directo (ej: https://twitch.tv/ibai):")
