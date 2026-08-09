@@ -138,6 +138,14 @@ class OpenMarsApp(QMainWindow):
         pet_layout.addWidget(btn_info_pet)
         left_panel.addLayout(pet_layout)
         
+        stream_layout = QHBoxLayout()
+        btn_stream = QPushButton("📺 Conectar a Directo (Twitch/YouTube)")
+        btn_stream.setStyleSheet("background-color: #d32f2f;") # Red
+        btn_stream.clicked.connect(self.on_stream_selected)
+        
+        stream_layout.addWidget(btn_stream)
+        left_panel.addLayout(stream_layout)
+        
         self.gallery = QListWidget()
         self.gallery.setViewMode(QListWidget.IconMode)
         self.gallery.setIconSize(QSize(100, 100))
@@ -301,6 +309,12 @@ class OpenMarsApp(QMainWindow):
     def on_pet_selected(self):
         self.gallery.clearSelection()
         self.media_worker.load_media('VIRTUAL_PET')
+        
+    def on_stream_selected(self):
+        url, ok = QInputDialog.getText(self, "Directo (Twitch/YouTube)", "Introduce la URL del directo (ej: https://twitch.tv/ibai):")
+        if ok and url:
+            self.gallery.clearSelection()
+            self.media_worker.load_media(f"STREAM:{url}")
 
     def on_camera_selected(self):
         self.gallery.clearSelection()

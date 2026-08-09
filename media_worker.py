@@ -5,6 +5,7 @@ from PIL import Image, ImageOps, ImageSequence
 from PySide6.QtCore import QThread, Signal
 from PySide6.QtGui import QImage
 import shimeji_engine
+import streamlink
 
 FRAME_SIZE = 8 + 480 * 480 * 3 + 8
 CABECERA   = b'\xff\x00\x00\x00\x00\x1e\x01\xe0'
@@ -62,7 +63,7 @@ class MediaWorker(QThread):
         self.running = True
         
         while self.running:
-            if not self.media_path or (self.media_path not in ['OBS_CAMERA', 'VIRTUAL_PET'] and not self.media_path.startswith('http') and not os.path.exists(self.media_path)):
+            if not self.media_path or (self.media_path not in ['OBS_CAMERA', 'VIRTUAL_PET'] and not self.media_path.startswith('http') and not self.media_path.startswith('STREAM:') and not os.path.exists(self.media_path)):
                 time.sleep(0.1)
                 continue
                 
@@ -117,8 +118,45 @@ class MediaWorker(QThread):
                     time.sleep(max(0, interval - elapsed))
                 cap.release()
                 
+            # --- DIRECTOS (TWITCH/YOUTUBE) ---
+            elif path.startswith('STREAM:'):
+                url = path.split('STREAM:', 1)[1]
+                try:
+                    streams = streamlink.streams(url)
+                    if streams and "best" in streams:
+                        stream_url = streams["best"].url
+                        cap = cv2.VideoCapture(stream_url)
+                        fps = 30.0
+                        interval = 1.0 / fps
+                        
+                        while self.running and self.media_path == path:
+                            start_time = time.time()
+                            ret, frame = cap.read()
+                            if not ret:
+                                time.sleep(1)
+                                cap.release()
+                                cap = cv2.VideoCapture(stream_url)
+                                continue
+                                
+                            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                            pil_img = Image.fromarray(frame_rgb)
+                            
+                            payload, qimage = self.process_pil_frame(pil_img)
+                            self.usb_worker.update_payload(payload)
+                            self.preview_ready.emit(qimage)
+                            
+                            elapsed = time.time() - start_time
+                            time.sleep(max(0, interval - elapsed))
+                        
+                        cap.release()
+                    else:
+                        time.sleep(1)
+                except Exception as e:
+                    print(f"Error cargando stream: {e}")
+                    time.sleep(1)
+                
             # --- VIDEO MP4/AVI O CÁMARA IP (HTTP) ---
-            elif path.lower().endswith(('.mp4', '.avi', '.mkv', '.mov', '.webm')) or path.startswith('http'):
+            elif path.lower().endswith(('.mp4', '.avi', '.mkv', '.mov', '.webm')) or (path.startswith('http') and not path.startswith('STREAM:')):
                 cap = cv2.VideoCapture(path)
                 fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
                 if fps <= 0: fps = 30.0
