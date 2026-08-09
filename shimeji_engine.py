@@ -10,7 +10,7 @@ class ShimejiEngine:
         self.fps = fps
         self.running = False
         
-        self.assets_dir = os.path.join(os.path.dirname(__file__), 'assets', 'shimeji', 'miku')
+        self.assets_dir = os.path.join(os.path.dirname(__file__), 'assets', 'shimeji', 'marin')
         
         # Load sprites
         self.sprites = {

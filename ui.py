@@ -125,8 +125,8 @@ class OpenMarsApp(QMainWindow):
         left_panel.addLayout(ipcam_layout)
         
         pet_layout = QHBoxLayout()
-        btn_pet = QPushButton("👾 Iniciar Shimeji (Miku)")
-        btn_pet.setStyleSheet("background-color: #8e24aa;") # Purple
+        btn_pet = QPushButton("👾 Iniciar Shimeji (Marin)")
+        btn_pet.setStyleSheet("background-color: #f48fb1;") # Pink
         btn_pet.clicked.connect(self.on_pet_selected)
         
         btn_info_pet = QPushButton("ℹ️")
@@ -299,10 +299,10 @@ class OpenMarsApp(QMainWindow):
 
     def show_pet_info(self):
         QMessageBox.information(self, "Mascota Virtual",
-            "¡Acabas de invocar a Hatsune Miku en tu refrigeración líquida!\n\n"
+            "¡Acabas de invocar a Marin Kitagawa en tu refrigeración líquida!\n\n"
             "- Se pasea de forma autónoma por la pantalla de izquierda a derecha.\n"
             "- Descansa de forma aleatoria (modo Idle).\n"
-            "- Utiliza sprites reales extraídos de proyectos Shimeji.\n\n"
+            "- Utiliza GIFs generados a medida.\n\n"
             "Todo está renderizado en tiempo real a 30 FPS en segundo plano por Python sin usar apenas CPU/RAM."
         )
 
