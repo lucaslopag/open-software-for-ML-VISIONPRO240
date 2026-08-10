@@ -276,12 +276,19 @@ class MasterpieceMCEngine:
                     self.facing = 1 if dx > 0 else -1
                     self.vx = 2.5 * self.facing
                     if blocked_x and on_ground:
-                        # Saltar obstáculo
-                        self.vy = -8.5
-                        # Si está muy atascado (ejemplo, pared de 3 bloques), minar el obstáculo
                         front_x = bx + self.facing
-                        if self.is_solid(front_x, by):
-                            self.task_queue.insert(0, ('MINE', front_x, by))
+                        head_solid = self.is_solid(front_x, by - 1)
+                        foot_solid = self.is_solid(front_x, by)
+                        
+                        if head_solid:
+                            self.task_queue.insert(0, ('MINE', front_x, by - 1))
+                            self.vx = 0
+                        elif foot_solid:
+                            if self.is_solid(front_x, by - 2): # Techo bloqueado, picar abajo
+                                self.task_queue.insert(0, ('MINE', front_x, by))
+                                self.vx = 0
+                            else:
+                                self.vy = -8.5 # Salto limpio
                             
             elif action == 'WALK':
                 dx = tx - bx
@@ -292,15 +299,32 @@ class MasterpieceMCEngine:
                     self.facing = 1 if dx > 0 else -1
                     self.vx = 2.5 * self.facing
                     if blocked_x and on_ground:
-                        self.vy = -8.5
                         front_x = bx + self.facing
-                        if self.is_solid(front_x, by):
-                            self.task_queue.insert(0, ('MINE', front_x, by))
+                        head_solid = self.is_solid(front_x, by - 1)
+                        foot_solid = self.is_solid(front_x, by)
+                        
+                        if head_solid:
+                            self.task_queue.insert(0, ('MINE', front_x, by - 1))
+                            self.vx = 0
+                        elif foot_solid:
+                            if self.is_solid(front_x, by - 2): # Techo tapado, no saltar
+                                self.task_queue.insert(0, ('MINE', front_x, by))
+                                self.vx = 0
+                            else:
+                                self.vy = -8.5 # Salto limpio
 
     def get_frame(self):
         self.update()
-        cam_x = int(self.px) - SCREEN_W // 2
-        cam_y = int(self.py) - SCREEN_H // 2 + 50
+        target_cam_y = int(self.py) - SCREEN_H // 2 + 50
+        if not hasattr(self, 'cam_y'): self.cam_y = target_cam_y
+        self.cam_y += (target_cam_y - self.cam_y) * 0.2
+        
+        target_cam_x = int(self.px) - SCREEN_W // 2
+        if not hasattr(self, 'cam_x'): self.cam_x = target_cam_x
+        self.cam_x += (target_cam_x - self.cam_x) * 0.2
+        
+        cam_x = int(self.cam_x)
+        cam_y = int(self.cam_y)
         
         frame = Image.new('RGB', (SCREEN_W, SCREEN_H), (135, 206, 235))
         
