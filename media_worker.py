@@ -8,6 +8,7 @@ import shimeji_engine
 import terraria_engine
 import ultra_mc_engine
 import masterpiece_mc_engine
+import worldbox_engine
 import streamlink
 
 FRAME_SIZE = 8 + 480 * 480 * 3 + 8
@@ -66,7 +67,7 @@ class MediaWorker(QThread):
         self.running = True
         
         while self.running:
-            if not self.media_path or (self.media_path not in ['OBS_CAMERA', 'VIRTUAL_PET', 'TERRARIA_AI', 'ULTRA_MC', 'MASTERPIECE_MC'] and not self.media_path.startswith('http') and not self.media_path.startswith('STREAM:') and not os.path.exists(self.media_path)):
+            if not self.media_path or (self.media_path not in ['OBS_CAMERA', 'VIRTUAL_PET', 'TERRARIA_AI', 'ULTRA_MC', 'MASTERPIECE_MC', 'WORLDBOX_AI'] and not self.media_path.startswith('http') and not self.media_path.startswith('STREAM:') and not os.path.exists(self.media_path)):
                 time.sleep(0.1)
                 continue
                 
@@ -123,6 +124,22 @@ class MediaWorker(QThread):
             # --- MASTERPIECE MINECRAFT 2D ---
             elif path == 'MASTERPIECE_MC':
                 engine = masterpiece_mc_engine.MasterpieceMCEngine(fps=30)
+                engine.start()
+                interval = 1.0 / 30.0
+                
+                while self.running and self.media_path == path:
+                    start_time = time.time()
+                    pil_img = engine.get_frame()
+                    payload, qimage = self.process_pil_frame(pil_img)
+                    self.usb_worker.update_payload(payload)
+                    self.preview_ready.emit(qimage)
+                    elapsed = time.time() - start_time
+                    time.sleep(max(0, interval - elapsed))
+                engine.stop()
+
+            # --- WORLDBOX AI (UNITY HEADLESS) ---
+            elif path == 'WORLDBOX_AI':
+                engine = worldbox_engine.WorldboxEngine(fps=30)
                 engine.start()
                 interval = 1.0 / 30.0
                 

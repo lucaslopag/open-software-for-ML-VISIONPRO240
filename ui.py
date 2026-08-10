@@ -165,12 +165,17 @@ class OpenMarsApp(QMainWindow):
         btn_mc.setStyleSheet("background-color: #0277bd;") # Blue
         btn_mc.clicked.connect(self.on_mc_selected)
         
+        btn_wb = QPushButton("🌍 WorldBox (God AI)")
+        btn_wb.setStyleSheet("background-color: #2e7d32;") # Green
+        btn_wb.clicked.connect(self.on_wb_selected)
+        
         btn_info_mc = QPushButton("ℹ️")
         btn_info_mc.setStyleSheet("background-color: #555; font-size: 16px; padding: 4px;")
         btn_info_mc.setFixedWidth(40)
         btn_info_mc.clicked.connect(self.show_mc_info)
         
         mc_layout.addWidget(btn_mc)
+        mc_layout.addWidget(btn_wb)
         mc_layout.addWidget(btn_info_mc)
         left_panel.addLayout(mc_layout)
         
@@ -365,6 +370,10 @@ class OpenMarsApp(QMainWindow):
     def on_mc_selected(self):
         self.gallery.clearSelection()
         self.media_worker.load_media('MASTERPIECE_MC')
+
+    def on_wb_selected(self):
+        self.gallery.clearSelection()
+        self.media_worker.load_media('WORLDBOX_AI')
         
     def on_stream_selected(self):
         url, ok = QInputDialog.getText(self, "Directo (Twitch/YouTube)", "Introduce la URL del directo (ej: https://twitch.tv/ibai):")
