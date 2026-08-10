@@ -78,16 +78,24 @@ class WorldboxEngine:
         
         # 1. Cerrar Menú de Bienvenida o ir directo a Crear Mundo
         print("[WorldBox AI] Intentando cerrar menú de bienvenida...")
+        # Forzar foco en la ventana de X11 haciendo clic en una esquina vacía (arriba)
+        self.xdo("mousemove", "240", "10", "click", "1")
+        time.sleep(0.5)
         self.xdo("key", "Escape")
-        time.sleep(0.5)
-        # Spam clicks en la zona del botón "Cerrar" y "Crear nuevos mundos"
-        for cx in range(250, 380, 30):
-            self.xdo("mousemove", str(cx), "330", "click", "1") # Fila de CERRAR
-            time.sleep(0.2)
-        self.xdo("mousemove", "240", "380", "click", "1") # Barra verde de "Crear mundo"
-        time.sleep(0.5)
-        self.xdo("mousemove", "95", "140", "click", "1")  # Botón X (por si acaso)
-        time.sleep(0.5)
+        time.sleep(1.0)
+        
+        # Barrido de seguridad sobre la "X" roja (Arriba a la izquierda del popup)
+        for cx in range(75, 115, 10):
+            for cy in range(95, 145, 10):
+                self.xdo("mousemove", str(cx), str(cy), "click", "1")
+                time.sleep(0.05)
+                
+        # Barrido sobre el botón CERRAR por si acaso
+        for cx in range(320, 390, 20):
+            self.xdo("mousemove", str(cx), "330", "click", "1")
+            time.sleep(0.05)
+            
+        time.sleep(1.0)
         self.xdo("key", "Escape")
         time.sleep(2.0)
         
