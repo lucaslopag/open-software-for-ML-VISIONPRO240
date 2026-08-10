@@ -73,28 +73,49 @@ class WorldboxEngine:
         env["DISPLAY"] = ":99"
         subprocess.run(["xdotool"] + list(args), env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
+    def capture_debug(self, prefix):
+        try:
+            import mss
+            from PIL import Image
+            import os, time
+            os.makedirs("/tmp/wb_screenshots", exist_ok=True)
+            # Limpiar capturas antiguas si hay más de 20
+            files = sorted(os.listdir("/tmp/wb_screenshots"))
+            if len(files) > 20:
+                os.remove(f"/tmp/wb_screenshots/{files[0]}")
+                
+            with mss.mss(display=":99") as sct:
+                monitor = sct.monitors[1]
+                sct_img = sct.grab(monitor)
+                img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
+                img.save(f"/tmp/wb_screenshots/{prefix}_{int(time.time())}.png")
+        except Exception as e:
+            print(f"[WorldBox AI] Error al capturar log visual: {e}")
+
     def ai_loop(self):
         time.sleep(15) # Esperar a que el juego cargue completamente
+        self.capture_debug("00_antes_de_cerrar_popup")
         
         # 1. Cerrar Menú de Bienvenida (sin usar Escape para no abrir Ajustes)
         print("[WorldBox AI] Intentando cerrar menú de bienvenida...")
-        # Forzar foco en la ventana de X11 haciendo clic en una esquina vacía (arriba)
-        self.xdo("mousemove", "240", "10", "click", "1")
+        # Forzar foco en la ventana de X11 haciendo clic en una esquina vacía (arriba izquierda)
+        self.xdo("mousemove", "10", "10", "click", "1")
         time.sleep(0.5)
         
-        # Barrido de seguridad sobre la "X" roja (Arriba a la izquierda del popup)
-        # Si el popup no está, solo hará clics inofensivos en el mapa
-        for cx in range(75, 125, 10):
-            for cy in range(95, 155, 10):
+        # Barrido de seguridad sobre la "X" roja (Arriba a la derecha del popup, aprox X:360, Y:65)
+        for cx in range(345, 375, 10):
+            for cy in range(55, 80, 10):
                 self.xdo("mousemove", str(cx), str(cy), "click", "1")
                 time.sleep(0.05)
                 
-        # Barrido sobre el botón CERRAR por si acaso
-        for cx in range(320, 390, 20):
-            self.xdo("mousemove", str(cx), "330", "click", "1")
-            time.sleep(0.05)
+        # Barrido sobre el botón CERRAR (Abajo a la derecha, aprox X:300, Y:380)
+        for cx in range(290, 320, 10):
+            for cy in range(370, 390, 10):
+                self.xdo("mousemove", str(cx), str(cy), "click", "1")
+                time.sleep(0.05)
             
         time.sleep(1.0)
+        self.capture_debug("01_despues_de_cerrar_popup")
         
         # 2. Hacer Zoom al mínimo (scroll abajo)
         print("[WorldBox AI] Haciendo zoom al mínimo...")
@@ -103,6 +124,7 @@ class WorldboxEngine:
             self.xdo("click", "5") # Rueda hacia abajo
             time.sleep(0.1)
         time.sleep(1.0)
+        self.capture_debug("02_despues_de_zoom")
         
         # Coordenadas UI estimadas en 480x480
         TABS = {
@@ -131,6 +153,7 @@ class WorldboxEngine:
             # Botón Generar (Abajo centro)
             self.xdo("mousemove", "240", "420", "click", "1") 
             time.sleep(6.0) # Esperar a que acabe de generar
+            self.capture_debug("03_despues_de_generar_mapa")
             
             # Guardar flag
             try:
@@ -160,6 +183,8 @@ class WorldboxEngine:
         for _ in range(15):
             self.xdo("mousemove", str(random.randint(280, 430)), str(random.randint(100, 350)), "click", "1")
             time.sleep(0.1)
+            
+        self.capture_debug("04_despues_de_spawn")
             
         last_resource_time = time.time()
         last_disaster_time = time.time()
