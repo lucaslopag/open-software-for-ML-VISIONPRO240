@@ -74,22 +74,9 @@ class WorldboxEngine:
     def ai_loop(self):
         time.sleep(20) # Esperar a que el juego cargue completamente
         
-        # 1. Cerrar cualquier popup/consola que haya quedado
-        print("[WorldBox AI] Limpiando interfaz...")
-        # Clic en la X roja de la consola de debug si existe (arriba-izquierda)
-        self.xdo("mousemove", "48", "48", "click", "1")
-        time.sleep(0.5)
-        self.xdo("mousemove", "48", "48", "click", "1")
-        time.sleep(0.5)
-        # Clic más arriba por si la X está más pegada al borde
-        self.xdo("mousemove", "35", "35", "click", "1")
-        time.sleep(0.5)
-        self.xdo("mousemove", "35", "35", "click", "1")
-        time.sleep(1.0)
-        
-        # 2. Cerrar Menú de Bienvenida
+        # 1. Cerrar Menú de Bienvenida
         print("[WorldBox AI] Cerrando menú de bienvenida...")
-        # Intentar con varias posiciones del botón CERRAR
+        # Intentar con varias posiciones del botón CERRAR (abajo a la derecha del popup)
         for cx, cy in [(380, 340), (400, 350), (370, 330), (390, 360)]:
             self.xdo("mousemove", str(cx), str(cy), "click", "1")
             time.sleep(0.5)
