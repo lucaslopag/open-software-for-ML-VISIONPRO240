@@ -32,6 +32,10 @@ class WorldboxEngine:
         print("[WorldBox] Iniciando binario de Unity...")
         env = os.environ.copy()
         env["DISPLAY"] = ":99"
+        # Mutear el juego bloqueando el servidor de audio (FMOD / PulseAudio)
+        env["PULSE_SERVER"] = "dummy"
+        env["SDL_AUDIODRIVER"] = "dummy"
+        env["ALSA_PCM_NAME"] = "dummy"
         
         # Forzamos resolución por si acaso
         cmd = [
