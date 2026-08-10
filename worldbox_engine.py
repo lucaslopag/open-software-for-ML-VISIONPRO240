@@ -70,6 +70,25 @@ class WorldboxEngine:
     def ai_loop(self):
         time.sleep(15) # Esperar a que el juego cargue completamente
         
+        # 1. Cerrar Menú de Bienvenida (con redundancia)
+        print("[WorldBox AI] Cerrando menú de bienvenida...")
+        self.xdo("key", "Escape")
+        time.sleep(1.0)
+        self.xdo("mousemove", "370", "330", "click", "1") # Botón CERRAR
+        time.sleep(1.0)
+        self.xdo("mousemove", "95", "140", "click", "1")  # Botón X
+        time.sleep(1.0)
+        self.xdo("key", "Escape")
+        time.sleep(2.0)
+        
+        # 2. Hacer Zoom al mínimo (scroll abajo)
+        print("[WorldBox AI] Haciendo zoom al mínimo...")
+        self.xdo("mousemove", "240", "240")
+        for _ in range(15):
+            self.xdo("click", "5") # Rueda hacia abajo
+            time.sleep(0.1)
+        time.sleep(1.0)
+        
         # Coordenadas UI estimadas en 480x480
         TABS = {
             'WORLD': (40, 450),
@@ -80,23 +99,38 @@ class WorldboxEngine:
             'DESTRUCT': (440, 450)
         }
         
-        # 1. Iniciar con las poblaciones base (10 Humanos, 10 Orcos)
+        # 3. Generar Mapa Nuevo con mucha tierra (Islas)
+        print("[WorldBox AI] Generando un mapa nuevo gigante...")
+        self.xdo("mousemove", str(TABS['WORLD'][0]), str(TABS['WORLD'][1]), "click", "1")
+        time.sleep(1.0)
+        self.xdo("mousemove", "60", "400", "click", "1") # Icono Crear Mundo
+        time.sleep(1.5)
+        # Seleccionar Preset Continentes o Islas (Centro)
+        self.xdo("mousemove", "240", "240", "click", "1") 
+        time.sleep(0.5)
+        # Seleccionar tamaño Gigante (Centro-Derecha arriba)
+        self.xdo("mousemove", "380", "150", "click", "1") 
+        time.sleep(0.5)
+        # Botón Generar (Abajo centro)
+        self.xdo("mousemove", "240", "420", "click", "1") 
+        time.sleep(6.0) # Esperar a que acabe de generar
+        
+        # 4. Iniciar con las poblaciones base (10 Humanos, 10 Orcos)
         print("[WorldBox AI] Spawn de 10 Humanos y 10 Orcos...")
-        # Seleccionar Pestaña Civilizaciones
         self.xdo("mousemove", str(TABS['CIVS'][0]), str(TABS['CIVS'][1]), "click", "1")
         time.sleep(1.0)
         
-        # Humanos (Suelen estar a la izquierda del submenú)
+        # Humanos (Izquierda)
         self.xdo("mousemove", "60", "400", "click", "1")
         time.sleep(0.5)
-        for _ in range(10):
+        for _ in range(15):
             self.xdo("mousemove", str(random.randint(50, 200)), str(random.randint(100, 350)), "click", "1")
             time.sleep(0.1)
             
-        # Orcos (Suelen estar al lado de los elfos, un poco más a la derecha)
+        # Orcos (Derecha)
         self.xdo("mousemove", "180", "400", "click", "1")
         time.sleep(0.5)
-        for _ in range(10):
+        for _ in range(15):
             self.xdo("mousemove", str(random.randint(280, 430)), str(random.randint(100, 350)), "click", "1")
             time.sleep(0.1)
             
