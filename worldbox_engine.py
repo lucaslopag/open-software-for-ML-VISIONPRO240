@@ -17,10 +17,16 @@ class WorldboxEngine:
         
     def start(self):
         self.running = True
+        
+        # Limpiar cualquier rastro de Xvfb zombie
+        subprocess.run(["killall", "-9", "Xvfb"], stderr=subprocess.DEVNULL)
+        subprocess.run(["rm", "-f", "/tmp/.X99-lock"], stderr=subprocess.DEVNULL)
+        subprocess.run(["rm", "-f", "/tmp/.X11-unix/X99"], stderr=subprocess.DEVNULL)
+        
         # Iniciar Monitor Fantasma
         print("[WorldBox] Iniciando Xvfb en :99...")
         self.xvfb_proc = subprocess.Popen(["Xvfb", ":99", "-screen", "0", "480x480x24"])
-        time.sleep(1) # Esperar a que el servidor X inicie
+        time.sleep(2) # Esperar a que el servidor X inicie completamente
         
         # Iniciar WorldBox atrapado en :99
         print("[WorldBox] Iniciando binario de Unity...")
@@ -36,9 +42,21 @@ class WorldboxEngine:
         ]
         self.wb_proc = subprocess.Popen(cmd, env=env)
         
-        # Iniciar Capturador
-        self.sct = mss.mss(display=":99")
-        
+        # Iniciar Capturador con reintentos
+        self.sct = None
+        for i in range(5):
+            try:
+                self.sct = mss.mss(display=":99")
+                break
+            except Exception as e:
+                print(f"[WorldBox] Error conectando a :99, reintentando ({i+1}/5)...")
+                time.sleep(1)
+                
+        if not self.sct:
+            print("[WorldBox] FATAL: No se pudo conectar a Xvfb en :99")
+            self.running = False
+            return
+            
         # Iniciar IA Poltergeist
         self.ai_thread = threading.Thread(target=self.ai_loop)
         self.ai_thread.daemon = True
@@ -135,7 +153,7 @@ class WorldboxEngine:
             time.sleep(random.uniform(5.0, 10.0))
 
     def get_frame(self):
-        if not self.running:
+        if not self.running or not getattr(self, 'sct', None):
             return Image.new('RGB', (480, 480), (0,0,0))
             
         try:

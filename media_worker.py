@@ -73,10 +73,14 @@ class MediaWorker(QThread):
                 
             path = self.media_path
             
-            # --- MASCOTA VIRTUAL ---
             if path == 'VIRTUAL_PET':
                 engine = shimeji_engine.ShimejiEngine(fps=30)
-                engine.start()
+                try:
+                    engine.start()
+                except Exception as e:
+                    print(f"Error starting {path}: {e}")
+                    time.sleep(2)
+                    continue
                 interval = 1.0 / 30.0
                 
                 while self.running and self.media_path == path:
@@ -89,10 +93,14 @@ class MediaWorker(QThread):
                     time.sleep(max(0, interval - elapsed))
                 engine.stop()
                 
-            # --- TERRARIA IA ---
             elif path == 'TERRARIA_AI':
                 engine = terraria_engine.TerrariaEngine(fps=30)
-                engine.start()
+                try:
+                    engine.start()
+                except Exception as e:
+                    print(f"Error starting {path}: {e}")
+                    time.sleep(2)
+                    continue
                 interval = 1.0 / 30.0
                 
                 while self.running and self.media_path == path:
@@ -105,10 +113,14 @@ class MediaWorker(QThread):
                     time.sleep(max(0, interval - elapsed))
                 engine.stop()
 
-            # --- ULTRA MINECRAFT 2D ---
             elif path == 'ULTRA_MC':
                 engine = ultra_mc_engine.UltraMCEngine(fps=30)
-                engine.start()
+                try:
+                    engine.start()
+                except Exception as e:
+                    print(f"Error starting {path}: {e}")
+                    time.sleep(2)
+                    continue
                 interval = 1.0 / 30.0
                 
                 while self.running and self.media_path == path:
@@ -121,10 +133,14 @@ class MediaWorker(QThread):
                     time.sleep(max(0, interval - elapsed))
                 engine.stop()
 
-            # --- MASTERPIECE MINECRAFT 2D ---
             elif path == 'MASTERPIECE_MC':
                 engine = masterpiece_mc_engine.MasterpieceMCEngine(fps=30)
-                engine.start()
+                try:
+                    engine.start()
+                except Exception as e:
+                    print(f"Error starting {path}: {e}")
+                    time.sleep(2)
+                    continue
                 interval = 1.0 / 30.0
                 
                 while self.running and self.media_path == path:
@@ -137,10 +153,14 @@ class MediaWorker(QThread):
                     time.sleep(max(0, interval - elapsed))
                 engine.stop()
 
-            # --- WORLDBOX AI (UNITY HEADLESS) ---
             elif path == 'WORLDBOX_AI':
                 engine = worldbox_engine.WorldboxEngine(fps=30)
-                engine.start()
+                try:
+                    engine.start()
+                except Exception as e:
+                    print(f"Error starting {path}: {e}")
+                    time.sleep(2)
+                    continue
                 interval = 1.0 / 30.0
                 
                 while self.running and self.media_path == path:
