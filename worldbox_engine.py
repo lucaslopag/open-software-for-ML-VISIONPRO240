@@ -111,30 +111,9 @@ class WorldboxEngine:
         time.sleep(1.0)
         self.capture_debug("01_despues_de_cerrar_popup")
         
-        # 1.5 Cargar Guardado 1 explícitamente
-        print("[WorldBox AI] Cargando el Guardado 1 (Mundo del Usuario)...")
-        # Click en la pestaña Mundo
-        self.xdo("mousemove", "40", "450", "click", "1")
-        time.sleep(1.0)
-        # Click en Guardados (Primer icono del submenú, Y=365)
-        self.xdo("mousemove", "60", "365", "click", "1")
-        time.sleep(1.5)
-        # Clic en el Slot 1 (Arriba a la izquierda/centro en la lista de guardados)
-        for cx in range(120, 250, 30):
-            for cy in range(120, 180, 20):
-                self.xdo("mousemove", str(cx), str(cy), "click", "1")
-                time.sleep(0.1)
-                
-        time.sleep(1.5)
-        # Rechazar guardar el mundo actual (Botón "No", mitad derecha de la pantalla)
-        print("[WorldBox AI] Rechazando guardar el mundo predeterminado...")
-        for cx in range(260, 380, 20):
-            for cy in range(250, 350, 20):
-                self.xdo("mousemove", str(cx), str(cy), "click", "1")
-                time.sleep(0.05)
-                
-        time.sleep(6.0) # Esperar a que cargue el mapa
-        self.capture_debug("01_5_despues_de_cargar")
+        # EL MUNDO DEL USUARIO SE CARGA AUTOMÁTICAMENTE AL INICIAR EL JUEGO.
+        # No necesitamos abrir el menú de guardados.
+        # Solo cerramos el menú de bienvenida y procedemos con el spawn.
         
         # 2. Hacer Zoom al mínimo (scroll abajo)
         print("[WorldBox AI] Haciendo zoom al mínimo...")
@@ -147,12 +126,11 @@ class WorldboxEngine:
         
         # Coordenadas UI estimadas en 480x480
         TABS = {
-            'WORLD': (40, 450),
-            'NATURE': (120, 450),
-            'CIVS': (200, 450),
-            'ANIMALS': (280, 450),
-            'DISASTERS': (360, 450),
-            'DESTRUCT': (440, 450)
+            'WORLD': (60, 450),
+            'CIVS': (100, 450),
+            'NATURE': (140, 450),
+            'ANIMALS': (180, 450),
+            'DISASTERS': (220, 450)
         }
         
         # 3. La Generación de Mapa ha sido delegada al usuario.
@@ -166,8 +144,8 @@ class WorldboxEngine:
             self.xdo("mousemove", str(TABS['CIVS'][0]), str(TABS['CIVS'][1]), "click", "1")
             time.sleep(1.0)
             
-            # Humanos (Izquierda)
-            self.xdo("mousemove", "60", "365", "click", "1")
+            # Humanos (1er icono del submenú Civs)
+            self.xdo("mousemove", "20", "365", "click", "1")
             time.sleep(0.5)
             # Colonia Humana 1: Arriba-Izquierda
             for _ in range(10):
@@ -178,8 +156,8 @@ class WorldboxEngine:
                 self.xdo("mousemove", str(random.randint(340, 420)), str(random.randint(100, 180)), "click", "1")
                 time.sleep(0.1)
                 
-            # Orcos (Centro-Derecha en el submenú)
-            self.xdo("mousemove", "160", "365", "click", "1")
+            # Orcos (3er icono del submenú Civs)
+            self.xdo("mousemove", "100", "365", "click", "1")
             time.sleep(0.5)
             # Colonia Orca: Abajo-Centro
             for _ in range(10):
@@ -212,8 +190,8 @@ class WorldboxEngine:
                 print("[WorldBox AI] Evento: Lluvia de Recursos!")
                 self.xdo("mousemove", str(TABS['NATURE'][0]), str(TABS['NATURE'][1]), "click", "1")
                 time.sleep(1.0)
-                # Seleccionar un recurso mineral (Oro, Hierro, Piedra) (Submenú en Y=365)
-                self.xdo("mousemove", str(random.choice([150, 200, 250])), "365", "click", "1")
+                # Seleccionar un recurso mineral (Submenú Nature)
+                self.xdo("mousemove", str(random.choice([60, 100, 140])), "365", "click", "1")
                 time.sleep(0.5)
                 
                 # Dropear recursos
@@ -230,8 +208,8 @@ class WorldboxEngine:
                 self.xdo("mousemove", str(TABS['DISASTERS'][0]), str(TABS['DISASTERS'][1]), "click", "1")
                 time.sleep(1.0)
                 
-                # Seleccionar Meteorito o Terremoto (Submenú en Y=365)
-                safe_disasters_x = [60, 120, 180] 
+                # Seleccionar Meteorito o Terremoto (1er y 2do icono del submenú Disasters)
+                safe_disasters_x = [20, 60] 
                 self.xdo("mousemove", str(random.choice(safe_disasters_x)), "365", "click", "1")
                 time.sleep(0.5)
                 
