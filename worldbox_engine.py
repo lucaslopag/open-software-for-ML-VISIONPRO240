@@ -76,20 +76,26 @@ class WorldboxEngine:
         
         # 1. Cerrar Consola de Debug (X roja en la esquina superior izquierda)
         print("[WorldBox AI] Cerrando consola de errores...")
+        # Intentar con teclado (tecla típica de consola en Unity)
+        self.xdo("key", "grave")
+        time.sleep(0.5)
+        self.xdo("key", "asciitilde")
+        time.sleep(0.5)
+        
         # Barrido de clics (grid click) para no fallar el botón
-        for cx in range(30, 110, 15):
-            for cy in range(30, 90, 15):
+        for cx in range(30, 110, 20):
+            for cy in range(30, 90, 20):
                 self.xdo("mousemove", str(cx), str(cy), "click", "1")
-                time.sleep(0.02)
+                time.sleep(0.05)
         time.sleep(1.0)
         
         # 2. Cerrar Menú de Bienvenida (CERRAR en la esquina inferior derecha)
         print("[WorldBox AI] Cerrando menú de bienvenida...")
         # Barrido de clics en la zona del botón rojo CERRAR
-        for cx in range(350, 420, 15):
-            for cy in range(320, 370, 15):
+        for cx in range(340, 420, 20):
+            for cy in range(320, 380, 20):
                 self.xdo("mousemove", str(cx), str(cy), "click", "1")
-                time.sleep(0.02)
+                time.sleep(0.05)
         time.sleep(2.0)
         
         # 3. Hacer Zoom al mínimo (scroll abajo, mucho)
@@ -97,7 +103,7 @@ class WorldboxEngine:
         self.xdo("mousemove", "240", "240")
         for _ in range(40):
             self.xdo("click", "5") # Rueda hacia abajo = zoom out
-            time.sleep(0.02)
+            time.sleep(0.03)
         time.sleep(1.0)
         
         # Coordenadas UI estimadas en 480x480
