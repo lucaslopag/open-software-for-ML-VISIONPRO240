@@ -74,22 +74,7 @@ class WorldboxEngine:
     def ai_loop(self):
         time.sleep(25) # Esperar a que salten los errores (Discord)
         
-        # 1. Cerrar Consola de Debug (X roja en la esquina superior izquierda)
-        print("[WorldBox AI] Cerrando consola de errores...")
-        # Intentar con teclado (tecla típica de consola en Unity)
-        self.xdo("key", "grave")
-        time.sleep(0.5)
-        self.xdo("key", "asciitilde")
-        time.sleep(0.5)
-        
-        # Barrido de clics (grid click) para no fallar el botón
-        for cx in range(30, 110, 20):
-            for cy in range(30, 90, 20):
-                self.xdo("mousemove", str(cx), str(cy), "click", "1")
-                time.sleep(0.05)
-        time.sleep(1.0)
-        
-        # 2. Cerrar Menú de Bienvenida (CERRAR en la esquina inferior derecha)
+        # 1. Cerrar Menú de Bienvenida (CERRAR en la esquina inferior derecha)
         print("[WorldBox AI] Cerrando menú de bienvenida...")
         # Barrido de clics en la zona del botón rojo CERRAR
         for cx in range(340, 420, 20):
