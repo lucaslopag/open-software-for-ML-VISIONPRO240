@@ -76,21 +76,25 @@ class WorldboxEngine:
     def ai_loop(self):
         time.sleep(15) # Esperar a que el juego cargue completamente
         
-        # 1. Cerrar Menú de Bienvenida (con redundancia)
-        print("[WorldBox AI] Cerrando menú de bienvenida...")
+        # 1. Cerrar Menú de Bienvenida o ir directo a Crear Mundo
+        print("[WorldBox AI] Intentando cerrar menú de bienvenida...")
         self.xdo("key", "Escape")
-        time.sleep(1.0)
-        self.xdo("mousemove", "370", "330", "click", "1") # Botón CERRAR
-        time.sleep(1.0)
-        self.xdo("mousemove", "95", "140", "click", "1")  # Botón X
-        time.sleep(1.0)
+        time.sleep(0.5)
+        # Spam clicks en la zona del botón "Cerrar" y "Crear nuevos mundos"
+        for cx in range(250, 380, 30):
+            self.xdo("mousemove", str(cx), "330", "click", "1") # Fila de CERRAR
+            time.sleep(0.2)
+        self.xdo("mousemove", "240", "380", "click", "1") # Barra verde de "Crear mundo"
+        time.sleep(0.5)
+        self.xdo("mousemove", "95", "140", "click", "1")  # Botón X (por si acaso)
+        time.sleep(0.5)
         self.xdo("key", "Escape")
         time.sleep(2.0)
         
         # 2. Hacer Zoom al mínimo (scroll abajo)
         print("[WorldBox AI] Haciendo zoom al mínimo...")
         self.xdo("mousemove", "240", "240")
-        for _ in range(15):
+        for _ in range(20):
             self.xdo("click", "5") # Rueda hacia abajo
             time.sleep(0.1)
         time.sleep(1.0)
@@ -105,21 +109,33 @@ class WorldboxEngine:
             'DESTRUCT': (440, 450)
         }
         
-        # 3. Generar Mapa Nuevo con mucha tierra (Islas)
-        print("[WorldBox AI] Generando un mapa nuevo gigante...")
-        self.xdo("mousemove", str(TABS['WORLD'][0]), str(TABS['WORLD'][1]), "click", "1")
-        time.sleep(1.0)
-        self.xdo("mousemove", "60", "400", "click", "1") # Icono Crear Mundo
-        time.sleep(1.5)
-        # Seleccionar Preset Continentes o Islas (Centro)
-        self.xdo("mousemove", "240", "240", "click", "1") 
-        time.sleep(0.5)
-        # Seleccionar tamaño Gigante (Centro-Derecha arriba)
-        self.xdo("mousemove", "380", "150", "click", "1") 
-        time.sleep(0.5)
-        # Botón Generar (Abajo centro)
-        self.xdo("mousemove", "240", "420", "click", "1") 
-        time.sleep(6.0) # Esperar a que acabe de generar
+        # 3. Generar Mapa Nuevo con mucha tierra (Islas) SOLO LA PRIMERA VEZ
+        flag_path = os.path.expanduser("~/.config/unity3d/mkarpenko/WorldBox/ai_generated.flag")
+        if not os.path.exists(flag_path):
+            print("[WorldBox AI] Generando un mapa nuevo gigante (Primera Vez)...")
+            self.xdo("mousemove", str(TABS['WORLD'][0]), str(TABS['WORLD'][1]), "click", "1")
+            time.sleep(1.0)
+            self.xdo("mousemove", "60", "400", "click", "1") # Icono Crear Mundo
+            time.sleep(1.5)
+            # Seleccionar Preset Continentes o Islas (Centro)
+            self.xdo("mousemove", "240", "240", "click", "1") 
+            time.sleep(0.5)
+            # Seleccionar tamaño Gigante (Centro-Derecha arriba)
+            self.xdo("mousemove", "380", "150", "click", "1") 
+            time.sleep(0.5)
+            # Botón Generar (Abajo centro)
+            self.xdo("mousemove", "240", "420", "click", "1") 
+            time.sleep(6.0) # Esperar a que acabe de generar
+            
+            # Guardar flag
+            try:
+                os.makedirs(os.path.dirname(flag_path), exist_ok=True)
+                with open(flag_path, 'w') as f:
+                    f.write("done")
+            except Exception as e:
+                print("No se pudo guardar el flag:", e)
+        else:
+            print("[WorldBox AI] Mapa ya generado. Cargando partida guardada automáticamente...")
         
         # 4. Iniciar con las poblaciones base (10 Humanos, 10 Orcos)
         print("[WorldBox AI] Spawn de 10 Humanos y 10 Orcos...")
