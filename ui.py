@@ -161,7 +161,7 @@ class OpenMarsApp(QMainWindow):
         left_panel.addLayout(terraria_layout)
         
         mc_layout = QHBoxLayout()
-        btn_mc = QPushButton("⛏️ Minecraft (GitHub Port)")
+        btn_mc = QPushButton("⛏️ Minecraft 2D (Obra Maestra)")
         btn_mc.setStyleSheet("background-color: #0277bd;") # Blue
         btn_mc.clicked.connect(self.on_mc_selected)
         
@@ -364,7 +364,7 @@ class OpenMarsApp(QMainWindow):
         
     def on_mc_selected(self):
         self.gallery.clearSelection()
-        self.media_worker.load_media('GITHUB_MC')
+        self.media_worker.load_media('MASTERPIECE_MC')
         
     def on_stream_selected(self):
         url, ok = QInputDialog.getText(self, "Directo (Twitch/YouTube)", "Introduce la URL del directo (ej: https://twitch.tv/ibai):")
