@@ -6,7 +6,7 @@ from PySide6.QtCore import QThread, Signal
 from PySide6.QtGui import QImage
 import shimeji_engine
 import terraria_engine
-import advanced_mc_engine
+import ultra_mc_engine
 import streamlink
 
 FRAME_SIZE = 8 + 480 * 480 * 3 + 8
@@ -65,7 +65,7 @@ class MediaWorker(QThread):
         self.running = True
         
         while self.running:
-            if not self.media_path or (self.media_path not in ['OBS_CAMERA', 'VIRTUAL_PET', 'TERRARIA_AI', 'ADVANCED_MC'] and not self.media_path.startswith('http') and not self.media_path.startswith('STREAM:') and not os.path.exists(self.media_path)):
+            if not self.media_path or (self.media_path not in ['OBS_CAMERA', 'VIRTUAL_PET', 'TERRARIA_AI', 'ULTRA_MC'] and not self.media_path.startswith('http') and not self.media_path.startswith('STREAM:') and not os.path.exists(self.media_path)):
                 time.sleep(0.1)
                 continue
                 
@@ -103,9 +103,9 @@ class MediaWorker(QThread):
                     time.sleep(max(0, interval - elapsed))
                 engine.stop()
 
-            # --- ADVANCED MINECRAFT 2D ---
-            elif path == 'ADVANCED_MC':
-                engine = advanced_mc_engine.AdvancedMCEngine(fps=30)
+            # --- ULTRA MINECRAFT 2D ---
+            elif path == 'ULTRA_MC':
+                engine = ultra_mc_engine.UltraMCEngine(fps=30)
                 engine.start()
                 interval = 1.0 / 30.0
                 
