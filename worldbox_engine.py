@@ -29,13 +29,15 @@ class WorldboxEngine:
         time.sleep(2) # Esperar a que el servidor X inicie completamente
         
         # Iniciar WorldBox atrapado en :99
-        print("[WorldBox] Iniciando binario de Unity...")
+        print("[WorldBox] Iniciando binario de Unity sin audio...")
         env = os.environ.copy()
         env["DISPLAY"] = ":99"
-        # Mutear el juego bloqueando el servidor de audio (FMOD / PulseAudio)
+        
+        # Desactivar Audio forzando drivers nulos/falsos
         env["PULSE_SERVER"] = "dummy"
         env["SDL_AUDIODRIVER"] = "dummy"
-        env["ALSA_PCM_NAME"] = "dummy"
+        env["ALSO_NONE"] = "1"
+        env["FMOD_ALSA_DEVICE"] = "null"
         
         # Forzamos resolución por si acaso
         cmd = [
@@ -72,23 +74,25 @@ class WorldboxEngine:
         subprocess.run(["xdotool"] + list(args), env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     def ai_loop(self):
-        time.sleep(25) # Esperar a que salten los errores (Discord)
+        time.sleep(15) # Esperar a que el juego cargue completamente
         
-        # 1. Cerrar Menú de Bienvenida (CERRAR en la esquina inferior derecha)
+        # 1. Cerrar Menú de Bienvenida (con redundancia)
         print("[WorldBox AI] Cerrando menú de bienvenida...")
-        # Barrido de clics en la zona del botón rojo CERRAR
-        for cx in range(340, 420, 20):
-            for cy in range(320, 380, 20):
-                self.xdo("mousemove", str(cx), str(cy), "click", "1")
-                time.sleep(0.05)
+        self.xdo("key", "Escape")
+        time.sleep(1.0)
+        self.xdo("mousemove", "370", "330", "click", "1") # Botón CERRAR
+        time.sleep(1.0)
+        self.xdo("mousemove", "95", "140", "click", "1")  # Botón X
+        time.sleep(1.0)
+        self.xdo("key", "Escape")
         time.sleep(2.0)
         
-        # 3. Hacer Zoom al mínimo (scroll abajo, mucho)
+        # 2. Hacer Zoom al mínimo (scroll abajo)
         print("[WorldBox AI] Haciendo zoom al mínimo...")
         self.xdo("mousemove", "240", "240")
-        for _ in range(40):
-            self.xdo("click", "5") # Rueda hacia abajo = zoom out
-            time.sleep(0.03)
+        for _ in range(15):
+            self.xdo("click", "5") # Rueda hacia abajo
+            time.sleep(0.1)
         time.sleep(1.0)
         
         # Coordenadas UI estimadas en 480x480
@@ -101,22 +105,38 @@ class WorldboxEngine:
             'DESTRUCT': (440, 450)
         }
         
-        # 4. Iniciar con las poblaciones base (por si el mundo está vacío)
-        print("[WorldBox AI] Añadiendo Humanos y Orcos al mundo persistente...")
+        # 3. Generar Mapa Nuevo con mucha tierra (Islas)
+        print("[WorldBox AI] Generando un mapa nuevo gigante...")
+        self.xdo("mousemove", str(TABS['WORLD'][0]), str(TABS['WORLD'][1]), "click", "1")
+        time.sleep(1.0)
+        self.xdo("mousemove", "60", "400", "click", "1") # Icono Crear Mundo
+        time.sleep(1.5)
+        # Seleccionar Preset Continentes o Islas (Centro)
+        self.xdo("mousemove", "240", "240", "click", "1") 
+        time.sleep(0.5)
+        # Seleccionar tamaño Gigante (Centro-Derecha arriba)
+        self.xdo("mousemove", "380", "150", "click", "1") 
+        time.sleep(0.5)
+        # Botón Generar (Abajo centro)
+        self.xdo("mousemove", "240", "420", "click", "1") 
+        time.sleep(6.0) # Esperar a que acabe de generar
+        
+        # 4. Iniciar con las poblaciones base (10 Humanos, 10 Orcos)
+        print("[WorldBox AI] Spawn de 10 Humanos y 10 Orcos...")
         self.xdo("mousemove", str(TABS['CIVS'][0]), str(TABS['CIVS'][1]), "click", "1")
         time.sleep(1.0)
         
         # Humanos (Izquierda)
         self.xdo("mousemove", "60", "400", "click", "1")
         time.sleep(0.5)
-        for _ in range(5):
+        for _ in range(15):
             self.xdo("mousemove", str(random.randint(50, 200)), str(random.randint(100, 350)), "click", "1")
             time.sleep(0.1)
             
         # Orcos (Derecha)
         self.xdo("mousemove", "180", "400", "click", "1")
         time.sleep(0.5)
-        for _ in range(5):
+        for _ in range(15):
             self.xdo("mousemove", str(random.randint(280, 430)), str(random.randint(100, 350)), "click", "1")
             time.sleep(0.1)
             
