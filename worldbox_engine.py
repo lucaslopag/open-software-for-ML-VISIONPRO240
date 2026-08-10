@@ -107,15 +107,25 @@ class WorldboxEngine:
             for cy in range(55, 80, 10):
                 self.xdo("mousemove", str(cx), str(cy), "click", "1")
                 time.sleep(0.05)
-                
-        # Barrido sobre el botón CERRAR (Abajo a la derecha, aprox X:300, Y:380)
-        for cx in range(290, 320, 10):
-            for cy in range(370, 390, 10):
-                self.xdo("mousemove", str(cx), str(cy), "click", "1")
-                time.sleep(0.05)
             
         time.sleep(1.0)
         self.capture_debug("01_despues_de_cerrar_popup")
+        
+        # 1.5 Cargar Guardado 1 explícitamente
+        print("[WorldBox AI] Cargando el Guardado 1 (Mundo del Usuario)...")
+        # Click en la pestaña Mundo
+        self.xdo("mousemove", "40", "450", "click", "1")
+        time.sleep(1.0)
+        # Click en Guardados (Primer icono)
+        self.xdo("mousemove", "60", "400", "click", "1")
+        time.sleep(1.5)
+        # Clic en el Slot 1 (Arriba a la izquierda/centro en la lista)
+        for cx in range(120, 250, 30):
+            for cy in range(120, 180, 20):
+                self.xdo("mousemove", str(cx), str(cy), "click", "1")
+                time.sleep(0.1)
+        time.sleep(6.0) # Esperar a que cargue el mapa
+        self.capture_debug("01_5_despues_de_cargar")
         
         # 2. Hacer Zoom al mínimo (scroll abajo)
         print("[WorldBox AI] Haciendo zoom al mínimo...")
@@ -151,11 +161,11 @@ class WorldboxEngine:
             self.xdo("mousemove", "60", "400", "click", "1")
             time.sleep(0.5)
             # Colonia Humana 1: Arriba-Izquierda
-            for _ in range(8):
+            for _ in range(10):
                 self.xdo("mousemove", str(random.randint(60, 140)), str(random.randint(100, 180)), "click", "1")
                 time.sleep(0.1)
             # Colonia Humana 2: Arriba-Derecha
-            for _ in range(8):
+            for _ in range(10):
                 self.xdo("mousemove", str(random.randint(340, 420)), str(random.randint(100, 180)), "click", "1")
                 time.sleep(0.1)
                 
@@ -163,7 +173,7 @@ class WorldboxEngine:
             self.xdo("mousemove", "160", "400", "click", "1")
             time.sleep(0.5)
             # Colonia Orca: Abajo-Centro
-            for _ in range(8):
+            for _ in range(10):
                 self.xdo("mousemove", str(random.randint(200, 280)), str(random.randint(300, 380)), "click", "1")
                 time.sleep(0.1)
                 
