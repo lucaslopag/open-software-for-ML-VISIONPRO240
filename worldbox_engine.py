@@ -50,52 +50,89 @@ class WorldboxEngine:
         subprocess.run(["xdotool"] + list(args), env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     def ai_loop(self):
-        time.sleep(8) # Esperar a que el juego cargue
+        time.sleep(15) # Esperar a que el juego cargue completamente
         
-        # La interfaz de WorldBox está en los bordes.
-        # Coordenadas aproximadas para 480x480:
-        # Pestañas inferiores (Naturaleza, Civilizaciones, Animales, Destrucción)
+        # Coordenadas UI estimadas en 480x480
+        TABS = {
+            'WORLD': (40, 450),
+            'NATURE': (120, 450),
+            'CIVS': (200, 450),
+            'ANIMALS': (280, 450),
+            'DISASTERS': (360, 450),
+            'DESTRUCT': (440, 450)
+        }
         
-        tabs = [
-            (100, 450), # Naturaleza
-            (180, 450), # Civilizaciones
-            (260, 450), # Animales
-            (340, 450)  # Destrucción / Bombas
-        ]
+        # 1. Iniciar con las poblaciones base (10 Humanos, 10 Orcos)
+        print("[WorldBox AI] Spawn de 10 Humanos y 10 Orcos...")
+        # Seleccionar Pestaña Civilizaciones
+        self.xdo("mousemove", str(TABS['CIVS'][0]), str(TABS['CIVS'][1]), "click", "1")
+        time.sleep(1.0)
+        
+        # Humanos (Suelen estar a la izquierda del submenú)
+        self.xdo("mousemove", "60", "400", "click", "1")
+        time.sleep(0.5)
+        for _ in range(10):
+            self.xdo("mousemove", str(random.randint(50, 200)), str(random.randint(100, 350)), "click", "1")
+            time.sleep(0.1)
+            
+        # Orcos (Suelen estar al lado de los elfos, un poco más a la derecha)
+        self.xdo("mousemove", "180", "400", "click", "1")
+        time.sleep(0.5)
+        for _ in range(10):
+            self.xdo("mousemove", str(random.randint(280, 430)), str(random.randint(100, 350)), "click", "1")
+            time.sleep(0.1)
+            
+        last_resource_time = time.time()
+        last_disaster_time = time.time()
+        
+        resource_interval = random.randint(600, 1800) # 10 a 30 mins
+        disaster_interval = random.randint(300, 900)  # 5 a 15 mins
         
         while self.running:
-            # Seleccionar una pestaña al azar
-            tx, ty = random.choice(tabs)
-            self.xdo("mousemove", str(tx), str(ty), "click", "1")
-            time.sleep(1.0)
+            now = time.time()
             
-            # Hacer clics aleatorios en el menú secundario (que aparece encima de las pestañas)
-            for _ in range(3):
-                sx = random.randint(50, 430)
-                sy = random.randint(380, 420)
-                self.xdo("mousemove", str(sx), str(sy), "click", "1")
-                time.sleep(0.5)
-                
-            # Espamear la herramienta seleccionada en el mapa
-            for _ in range(10):
-                if not self.running: break
-                mx = random.randint(50, 430)
-                my = random.randint(50, 350)
-                
-                # Simular click presionado o rápido
-                self.xdo("mousemove", str(mx), str(my), "mousedown", "1")
-                time.sleep(0.2)
-                self.xdo("mousemove", str(mx + random.randint(-20, 20)), str(my + random.randint(-20, 20)))
-                self.xdo("mouseup", "1")
-                
-                time.sleep(0.5)
-                
-            # A veces hacer scroll/arrastrar cámara
-            if random.random() < 0.3:
-                self.xdo("mousemove", "240", "240", "mousedown", "3") # Clic derecho
-                self.xdo("mousemove_relative", "--", str(random.randint(-100, 100)), str(random.randint(-100, 100)))
-                self.xdo("mouseup", "3")
+            # Evento: Recursos
+            if now - last_resource_time > resource_interval:
+                print("[WorldBox AI] Evento: Lluvia de Recursos!")
+                self.xdo("mousemove", str(TABS['NATURE'][0]), str(TABS['NATURE'][1]), "click", "1")
                 time.sleep(1.0)
+                # Seleccionar un recurso mineral (Oro, Hierro, Piedra)
+                self.xdo("mousemove", str(random.choice([150, 200, 250])), "400", "click", "1")
+                time.sleep(0.5)
+                
+                # Dropear recursos
+                for _ in range(30):
+                    self.xdo("mousemove", str(random.randint(50, 430)), str(random.randint(50, 350)), "click", "1")
+                    time.sleep(0.1)
+                    
+                last_resource_time = now
+                resource_interval = random.randint(600, 1800)
+                
+            # Evento: Desastre Menor
+            if now - last_disaster_time > disaster_interval:
+                print("[WorldBox AI] Evento: Desastre Aleatorio!")
+                self.xdo("mousemove", str(TABS['DISASTERS'][0]), str(TABS['DISASTERS'][1]), "click", "1")
+                time.sleep(1.0)
+                
+                # Seleccionar Meteorito o Terremoto
+                # (Evitamos la Tsar Bomba o Antimateria que están a la derecha)
+                safe_disasters_x = [60, 120, 180] 
+                self.xdo("mousemove", str(random.choice(safe_disasters_x)), "400", "click", "1")
+                time.sleep(0.5)
+                
+                # Tirar 1 o 2 desastres
+                for _ in range(random.randint(1, 2)):
+                    self.xdo("mousemove", str(random.randint(100, 380)), str(random.randint(100, 250)), "click", "1")
+                    time.sleep(0.3)
+                    
+                last_disaster_time = now
+                disaster_interval = random.randint(300, 900)
+                
+            # Comportamiento Pasivo (Mover la cámara y mirar)
+            self.xdo("mousemove", "240", "240", "mousedown", "3") # Clic derecho
+            self.xdo("mousemove_relative", "--", str(random.randint(-150, 150)), str(random.randint(-150, 150)))
+            self.xdo("mouseup", "3")
+            time.sleep(random.uniform(5.0, 10.0))
 
     def get_frame(self):
         if not self.running:
