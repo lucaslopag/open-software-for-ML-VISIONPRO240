@@ -52,6 +52,8 @@ class MasterpieceMCEngine:
         self.task_queue = [] # Lista de tuplas: ('MINE', x, y) o ('PLACE', x, y, block_id)
         self.macro_goal = 'GATHER_WOOD'
         self.action_timer = 0
+        self.stuck_timer = 0
+        self.last_px = 0.0
         
         self.dark_overlays = []
         for i in range(16):
@@ -208,6 +210,23 @@ class MasterpieceMCEngine:
         
         self.px = next_px
 
+        # Anti-Stuck System
+        if abs(self.px - self.last_px) < 0.1 and abs(self.py - self.last_py) < 0.1 and self.task_queue:
+            self.stuck_timer += 1
+            if self.stuck_timer > 90: # 3 segundos atascado
+                print("IA ATASCADA! Reseteando tarea actual y cavando alrededor.")
+                self.stuck_timer = 0
+                self.task_queue.pop(0) # Abortar tarea
+                # Minar todo alrededor para desatascarse
+                cbx, cby = int(self.px // BLOCK_SIZE), int(self.py // BLOCK_SIZE)
+                self.task_queue.insert(0, ('MINE', cbx + self.facing, cby))
+                self.task_queue.insert(0, ('MINE', cbx + self.facing, cby - 1))
+        else:
+            self.stuck_timer = 0
+            
+        self.last_px = self.px
+        self.last_py = self.py
+
         # CEREBRO A* (Orientado a Tareas)
         if self.action_timer > 0:
             self.action_timer -= 1
@@ -254,6 +273,12 @@ class MasterpieceMCEngine:
             tx, ty = task[1], task[2]
             
             dist = math.hypot(tx - bx, ty - by)
+            dx = tx - bx
+            
+            # Si estamos a punto de llegar a un objetivo pero DX es 0 y nos atascamos
+            if dx == 0 and dist > 3 and blocked_x:
+                self.facing = random.choice([-1, 1])
+                self.vx = 2.5 * self.facing
             
             if action == 'MINE' or action == 'PLACE':
                 if dist <= 3:
@@ -406,6 +431,16 @@ class MasterpieceMCEngine:
                 frame.paste(self.textures[b_id], (x, hud_y + 10))
             qty = self.inventory.get(b_id, 0)
             draw.text((x + 20, hud_y + 12), f"x{qty}", fill=(255,255,255))
+            
+        # IA DEBUG HUD
+        draw.rectangle([0, 0, 250, 80], fill=(0, 0, 0, 180))
+        draw.text((5, 5), f"PENSAMIENTO IA:", fill=(0,255,0))
+        draw.text((5, 20), f"META: {self.macro_goal}", fill=(255,255,255))
+        current_task = str(self.task_queue[0]) if self.task_queue else "IDLE"
+        draw.text((5, 35), f"TAREA: {current_task}", fill=(255,255,255))
+        draw.text((5, 50), f"COORD: X={int(self.px//BLOCK_SIZE)} Y={int(self.py//BLOCK_SIZE)}", fill=(255,255,255))
+        if self.stuck_timer > 30:
+            draw.text((5, 65), f"! ATASCADO ! ({self.stuck_timer}/90)", fill=(255,0,0))
 
         return frame
 
