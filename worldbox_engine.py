@@ -116,10 +116,10 @@ class WorldboxEngine:
         # Click en la pestaña Mundo
         self.xdo("mousemove", "40", "450", "click", "1")
         time.sleep(1.0)
-        # Click en Guardados (Primer icono)
-        self.xdo("mousemove", "60", "400", "click", "1")
+        # Click en Guardados (Primer icono del submenú, Y=365)
+        self.xdo("mousemove", "60", "365", "click", "1")
         time.sleep(1.5)
-        # Clic en el Slot 1 (Arriba a la izquierda/centro en la lista)
+        # Clic en el Slot 1 (Arriba a la izquierda/centro en la lista de guardados)
         for cx in range(120, 250, 30):
             for cy in range(120, 180, 20):
                 self.xdo("mousemove", str(cx), str(cy), "click", "1")
@@ -167,7 +167,7 @@ class WorldboxEngine:
             time.sleep(1.0)
             
             # Humanos (Izquierda)
-            self.xdo("mousemove", "60", "400", "click", "1")
+            self.xdo("mousemove", "60", "365", "click", "1")
             time.sleep(0.5)
             # Colonia Humana 1: Arriba-Izquierda
             for _ in range(10):
@@ -178,8 +178,8 @@ class WorldboxEngine:
                 self.xdo("mousemove", str(random.randint(340, 420)), str(random.randint(100, 180)), "click", "1")
                 time.sleep(0.1)
                 
-            # Orcos (Centro-Derecha en el menú)
-            self.xdo("mousemove", "160", "400", "click", "1")
+            # Orcos (Centro-Derecha en el submenú)
+            self.xdo("mousemove", "160", "365", "click", "1")
             time.sleep(0.5)
             # Colonia Orca: Abajo-Centro
             for _ in range(10):
@@ -212,8 +212,8 @@ class WorldboxEngine:
                 print("[WorldBox AI] Evento: Lluvia de Recursos!")
                 self.xdo("mousemove", str(TABS['NATURE'][0]), str(TABS['NATURE'][1]), "click", "1")
                 time.sleep(1.0)
-                # Seleccionar un recurso mineral (Oro, Hierro, Piedra)
-                self.xdo("mousemove", str(random.choice([150, 200, 250])), "400", "click", "1")
+                # Seleccionar un recurso mineral (Oro, Hierro, Piedra) (Submenú en Y=365)
+                self.xdo("mousemove", str(random.choice([150, 200, 250])), "365", "click", "1")
                 time.sleep(0.5)
                 
                 # Dropear recursos
@@ -230,10 +230,9 @@ class WorldboxEngine:
                 self.xdo("mousemove", str(TABS['DISASTERS'][0]), str(TABS['DISASTERS'][1]), "click", "1")
                 time.sleep(1.0)
                 
-                # Seleccionar Meteorito o Terremoto
-                # (Evitamos la Tsar Bomba o Antimateria que están a la derecha)
+                # Seleccionar Meteorito o Terremoto (Submenú en Y=365)
                 safe_disasters_x = [60, 120, 180] 
-                self.xdo("mousemove", str(random.choice(safe_disasters_x)), "400", "click", "1")
+                self.xdo("mousemove", str(random.choice(safe_disasters_x)), "365", "click", "1")
                 time.sleep(0.5)
                 
                 # Tirar 1 o 2 desastres
