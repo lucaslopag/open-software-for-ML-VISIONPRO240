@@ -136,34 +136,9 @@ class WorldboxEngine:
             'DESTRUCT': (440, 450)
         }
         
-        # 3. Generar Mapa Nuevo con mucha tierra (Islas) SOLO LA PRIMERA VEZ
-        flag_path = os.path.expanduser("~/.config/unity3d/mkarpenko/WorldBox/ai_generated.flag")
-        if not os.path.exists(flag_path):
-            print("[WorldBox AI] Generando un mapa nuevo gigante (Primera Vez)...")
-            self.xdo("mousemove", str(TABS['WORLD'][0]), str(TABS['WORLD'][1]), "click", "1")
-            time.sleep(1.0)
-            self.xdo("mousemove", "60", "400", "click", "1") # Icono Crear Mundo
-            time.sleep(1.5)
-            # Seleccionar Preset Continentes o Islas (Centro)
-            self.xdo("mousemove", "240", "240", "click", "1") 
-            time.sleep(0.5)
-            # Seleccionar tamaño Gigante (Centro-Derecha arriba)
-            self.xdo("mousemove", "380", "150", "click", "1") 
-            time.sleep(0.5)
-            # Botón Generar (Abajo centro)
-            self.xdo("mousemove", "240", "420", "click", "1") 
-            time.sleep(6.0) # Esperar a que acabe de generar
-            self.capture_debug("03_despues_de_generar_mapa")
-            
-            # Guardar flag
-            try:
-                os.makedirs(os.path.dirname(flag_path), exist_ok=True)
-                with open(flag_path, 'w') as f:
-                    f.write("done")
-            except Exception as e:
-                print("No se pudo guardar el flag:", e)
-        else:
-            print("[WorldBox AI] Mapa ya generado. Cargando partida guardada automáticamente...")
+        # 3. La Generación de Mapa ha sido delegada al usuario.
+        # El juego cargará automáticamente el último mapa guardado.
+        print("[WorldBox AI] Mapa administrado por el usuario. Continuando...")
         
         # 4. Iniciar con las poblaciones base (10 Humanos, 10 Orcos)
         print("[WorldBox AI] Spawn de 10 Humanos y 10 Orcos...")
@@ -263,12 +238,15 @@ class WorldboxEngine:
             except subprocess.TimeoutExpired:
                 self.wb_proc.kill()
         
+        if hasattr(self, 'sct') and self.sct:
+            try:
+                self.sct.close()
+            except Exception:
+                pass
+                
         if self.xvfb_proc:
             self.xvfb_proc.terminate()
             try:
                 self.xvfb_proc.wait(timeout=2)
             except subprocess.TimeoutExpired:
                 self.xvfb_proc.kill()
-        
-        if hasattr(self, 'sct'):
-            self.sct.close()
