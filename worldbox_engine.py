@@ -124,6 +124,15 @@ class WorldboxEngine:
             for cy in range(120, 180, 20):
                 self.xdo("mousemove", str(cx), str(cy), "click", "1")
                 time.sleep(0.1)
+                
+        time.sleep(1.5)
+        # Rechazar guardar el mundo actual (Botón "No", mitad derecha de la pantalla)
+        print("[WorldBox AI] Rechazando guardar el mundo predeterminado...")
+        for cx in range(260, 380, 20):
+            for cy in range(250, 350, 20):
+                self.xdo("mousemove", str(cx), str(cy), "click", "1")
+                time.sleep(0.05)
+                
         time.sleep(6.0) # Esperar a que cargue el mapa
         self.capture_debug("01_5_despues_de_cargar")
         
