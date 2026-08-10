@@ -54,6 +54,7 @@ class MasterpieceMCEngine:
         self.action_timer = 0
         self.stuck_timer = 0
         self.last_px = 0.0
+        self.last_py = 0.0
         
         self.dark_overlays = []
         for i in range(16):
