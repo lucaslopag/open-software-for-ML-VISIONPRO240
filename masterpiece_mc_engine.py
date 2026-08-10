@@ -211,8 +211,8 @@ class MasterpieceMCEngine:
         
         self.px = next_px
 
-        # Anti-Stuck System
-        if abs(self.px - self.last_px) < 0.1 and abs(self.py - self.last_py) < 0.1 and self.task_queue:
+        # Anti-Stuck System (Solo mirar eje X para detectar bucles de salto)
+        if abs(self.px - self.last_px) < 0.1 and self.task_queue:
             self.stuck_timer += 1
             if self.stuck_timer > 90: # 3 segundos atascado
                 print("IA ATASCADA! Reseteando tarea actual y cavando alrededor.")
@@ -302,19 +302,19 @@ class MasterpieceMCEngine:
                     self.facing = 1 if dx > 0 else -1
                     self.vx = 2.5 * self.facing
                     if blocked_x and on_ground:
+                        head_y = int(self.py // BLOCK_SIZE)
+                        foot_y = int((self.py + 23) // BLOCK_SIZE)
                         front_x = bx + self.facing
-                        head_solid = self.is_solid(front_x, by - 1)
-                        foot_solid = self.is_solid(front_x, by)
                         
-                        if head_solid:
-                            self.task_queue.insert(0, ('MINE', front_x, by - 1))
+                        can_jump = not self.is_solid(bx, head_y - 1) and not self.is_solid(front_x, head_y - 1) and not self.is_solid(front_x, head_y)
+                        
+                        if can_jump:
+                            self.vy = -8.5
+                        else:
+                            for y in range(head_y, foot_y + 1):
+                                if self.is_solid(front_x, y):
+                                    self.task_queue.insert(0, ('MINE', front_x, y))
                             self.vx = 0
-                        elif foot_solid:
-                            if self.is_solid(front_x, by - 2): # Techo bloqueado, picar abajo
-                                self.task_queue.insert(0, ('MINE', front_x, by))
-                                self.vx = 0
-                            else:
-                                self.vy = -8.5 # Salto limpio
                             
             elif action == 'WALK':
                 dx = tx - bx
@@ -325,19 +325,19 @@ class MasterpieceMCEngine:
                     self.facing = 1 if dx > 0 else -1
                     self.vx = 2.5 * self.facing
                     if blocked_x and on_ground:
+                        head_y = int(self.py // BLOCK_SIZE)
+                        foot_y = int((self.py + 23) // BLOCK_SIZE)
                         front_x = bx + self.facing
-                        head_solid = self.is_solid(front_x, by - 1)
-                        foot_solid = self.is_solid(front_x, by)
                         
-                        if head_solid:
-                            self.task_queue.insert(0, ('MINE', front_x, by - 1))
+                        can_jump = not self.is_solid(bx, head_y - 1) and not self.is_solid(front_x, head_y - 1) and not self.is_solid(front_x, head_y)
+                        
+                        if can_jump:
+                            self.vy = -8.5
+                        else:
+                            for y in range(head_y, foot_y + 1):
+                                if self.is_solid(front_x, y):
+                                    self.task_queue.insert(0, ('MINE', front_x, y))
                             self.vx = 0
-                        elif foot_solid:
-                            if self.is_solid(front_x, by - 2): # Techo tapado, no saltar
-                                self.task_queue.insert(0, ('MINE', front_x, by))
-                                self.vx = 0
-                            else:
-                                self.vy = -8.5 # Salto limpio
 
     def get_frame(self):
         self.update()
