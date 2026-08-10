@@ -72,28 +72,35 @@ class WorldboxEngine:
         subprocess.run(["xdotool"] + list(args), env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     def ai_loop(self):
-        time.sleep(15) # Esperar a que el juego cargue completamente
+        time.sleep(20) # Esperar a que el juego cargue completamente
         
-        # 1. Cerrar Consola de Debug (Se abre automáticamente por error de Discord)
-        print("[WorldBox AI] Cerrando consola de errores...")
-        # El botón rojo con la X está sobre el 15%X, 12%Y de la pantalla
-        for _ in range(3):
-            self.xdo("mousemove", "75", "60", "click", "1")
-            time.sleep(1.0)
-            
-        # 2. Cerrar Menú de Bienvenida (con redundancia)
-        print("[WorldBox AI] Cerrando menú de bienvenida...")
-        self.xdo("mousemove", "380", "340", "click", "1") # Botón CERRAR
+        # 1. Cerrar cualquier popup/consola que haya quedado
+        print("[WorldBox AI] Limpiando interfaz...")
+        # Clic en la X roja de la consola de debug si existe (arriba-izquierda)
+        self.xdo("mousemove", "48", "48", "click", "1")
+        time.sleep(0.5)
+        self.xdo("mousemove", "48", "48", "click", "1")
+        time.sleep(0.5)
+        # Clic más arriba por si la X está más pegada al borde
+        self.xdo("mousemove", "35", "35", "click", "1")
+        time.sleep(0.5)
+        self.xdo("mousemove", "35", "35", "click", "1")
         time.sleep(1.0)
-        self.xdo("mousemove", "380", "340", "click", "1")
+        
+        # 2. Cerrar Menú de Bienvenida
+        print("[WorldBox AI] Cerrando menú de bienvenida...")
+        # Intentar con varias posiciones del botón CERRAR
+        for cx, cy in [(380, 340), (400, 350), (370, 330), (390, 360)]:
+            self.xdo("mousemove", str(cx), str(cy), "click", "1")
+            time.sleep(0.5)
         time.sleep(2.0)
         
-        # 3. Hacer Zoom al mínimo (scroll abajo)
+        # 3. Hacer Zoom al mínimo (scroll abajo, mucho)
         print("[WorldBox AI] Haciendo zoom al mínimo...")
         self.xdo("mousemove", "240", "240")
-        for _ in range(25):
-            self.xdo("click", "5") # Rueda hacia abajo
-            time.sleep(0.05)
+        for _ in range(40):
+            self.xdo("click", "5") # Rueda hacia abajo = zoom out
+            time.sleep(0.03)
         time.sleep(1.0)
         
         # Coordenadas UI estimadas en 480x480
