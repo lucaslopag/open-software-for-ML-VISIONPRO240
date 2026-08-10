@@ -72,14 +72,24 @@ class WorldboxEngine:
         subprocess.run(["xdotool"] + list(args), env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     def ai_loop(self):
-        time.sleep(20) # Esperar a que el juego cargue completamente
+        time.sleep(25) # Esperar a que salten los errores (Discord)
         
-        # 1. Cerrar Menú de Bienvenida
+        # 1. Cerrar Consola de Debug (X roja en la esquina superior izquierda)
+        print("[WorldBox AI] Cerrando consola de errores...")
+        # Barrido de clics (grid click) para no fallar el botón
+        for cx in range(30, 110, 15):
+            for cy in range(30, 90, 15):
+                self.xdo("mousemove", str(cx), str(cy), "click", "1")
+                time.sleep(0.02)
+        time.sleep(1.0)
+        
+        # 2. Cerrar Menú de Bienvenida (CERRAR en la esquina inferior derecha)
         print("[WorldBox AI] Cerrando menú de bienvenida...")
-        # Intentar con varias posiciones del botón CERRAR (abajo a la derecha del popup)
-        for cx, cy in [(380, 340), (400, 350), (370, 330), (390, 360)]:
-            self.xdo("mousemove", str(cx), str(cy), "click", "1")
-            time.sleep(0.5)
+        # Barrido de clics en la zona del botón rojo CERRAR
+        for cx in range(350, 420, 15):
+            for cy in range(320, 370, 15):
+                self.xdo("mousemove", str(cx), str(cy), "click", "1")
+                time.sleep(0.02)
         time.sleep(2.0)
         
         # 3. Hacer Zoom al mínimo (scroll abajo, mucho)
@@ -87,7 +97,7 @@ class WorldboxEngine:
         self.xdo("mousemove", "240", "240")
         for _ in range(40):
             self.xdo("click", "5") # Rueda hacia abajo = zoom out
-            time.sleep(0.03)
+            time.sleep(0.02)
         time.sleep(1.0)
         
         # Coordenadas UI estimadas en 480x480
