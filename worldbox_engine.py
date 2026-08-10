@@ -18,6 +18,23 @@ class WorldboxEngine:
     def start(self):
         self.running = True
         
+        # INYECCIÓN DE PARTIDA GUARDADA
+        # Para evitar problemas de UI en 480x480, copiamos el save1 al autosave
+        # para que WorldBox lo cargue automáticamente al arrancar.
+        print("[WorldBox AI] Inyectando save1 en autosave para carga automática...")
+        saves_dir = os.path.expanduser("~/.config/unity3d/mkarpenko/WorldBox/saves/")
+        save1 = os.path.join(saves_dir, "save1")
+        autosaves_dir = os.path.expanduser("~/.config/unity3d/mkarpenko/WorldBox/autosaves/")
+        if os.path.exists(save1):
+            timestamp = str(int(time.time()))
+            target = os.path.join(autosaves_dir, timestamp)
+            try:
+                import shutil
+                shutil.copytree(save1, target)
+                print(f"[WorldBox AI] Save inyectado correctamente en {target}")
+            except Exception as e:
+                print(f"[WorldBox AI] Error inyectando save: {e}")
+        
         # Limpiar cualquier rastro de Xvfb zombie
         subprocess.run(["killall", "-9", "Xvfb"], stderr=subprocess.DEVNULL)
         subprocess.run(["rm", "-f", "/tmp/.X99-lock"], stderr=subprocess.DEVNULL)
