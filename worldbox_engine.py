@@ -140,26 +140,44 @@ class WorldboxEngine:
         # El juego cargará automáticamente el último mapa guardado.
         print("[WorldBox AI] Mapa administrado por el usuario. Continuando...")
         
-        # 4. Iniciar con las poblaciones base (10 Humanos, 10 Orcos)
-        print("[WorldBox AI] Spawn de 10 Humanos y 10 Orcos...")
-        self.xdo("mousemove", str(TABS['CIVS'][0]), str(TABS['CIVS'][1]), "click", "1")
-        time.sleep(1.0)
-        
-        # Humanos (Izquierda)
-        self.xdo("mousemove", "60", "400", "click", "1")
-        time.sleep(0.5)
-        for _ in range(15):
-            self.xdo("mousemove", str(random.randint(50, 200)), str(random.randint(100, 350)), "click", "1")
-            time.sleep(0.1)
+        # 4. Iniciar con las poblaciones base SOLO LA PRIMERA VEZ
+        flag_path = os.path.expanduser("~/.config/unity3d/mkarpenko/WorldBox/ai_spawned.flag")
+        if not os.path.exists(flag_path):
+            print("[WorldBox AI] Primera ejecución detectada. Spawneando colonias (2 Humanas, 1 Orcos)...")
+            self.xdo("mousemove", str(TABS['CIVS'][0]), str(TABS['CIVS'][1]), "click", "1")
+            time.sleep(1.0)
             
-        # Orcos (Derecha)
-        self.xdo("mousemove", "180", "400", "click", "1")
-        time.sleep(0.5)
-        for _ in range(15):
-            self.xdo("mousemove", str(random.randint(280, 430)), str(random.randint(100, 350)), "click", "1")
-            time.sleep(0.1)
+            # Humanos (Izquierda)
+            self.xdo("mousemove", "60", "400", "click", "1")
+            time.sleep(0.5)
+            # Colonia Humana 1: Arriba-Izquierda
+            for _ in range(8):
+                self.xdo("mousemove", str(random.randint(60, 140)), str(random.randint(100, 180)), "click", "1")
+                time.sleep(0.1)
+            # Colonia Humana 2: Arriba-Derecha
+            for _ in range(8):
+                self.xdo("mousemove", str(random.randint(340, 420)), str(random.randint(100, 180)), "click", "1")
+                time.sleep(0.1)
+                
+            # Orcos (Centro-Derecha en el menú)
+            self.xdo("mousemove", "160", "400", "click", "1")
+            time.sleep(0.5)
+            # Colonia Orca: Abajo-Centro
+            for _ in range(8):
+                self.xdo("mousemove", str(random.randint(200, 280)), str(random.randint(300, 380)), "click", "1")
+                time.sleep(0.1)
+                
+            self.capture_debug("04_despues_de_spawn")
             
-        self.capture_debug("04_despues_de_spawn")
+            # Guardar flag
+            try:
+                os.makedirs(os.path.dirname(flag_path), exist_ok=True)
+                with open(flag_path, 'w') as f:
+                    f.write("done")
+            except Exception as e:
+                print("No se pudo guardar el flag:", e)
+        else:
+            print("[WorldBox AI] Poblaciones ya generadas anteriormente. Saltando spawn inicial y pasando a eventos.")
             
         last_resource_time = time.time()
         last_disaster_time = time.time()
