@@ -76,17 +76,16 @@ class WorldboxEngine:
     def ai_loop(self):
         time.sleep(15) # Esperar a que el juego cargue completamente
         
-        # 1. Cerrar Menú de Bienvenida o ir directo a Crear Mundo
+        # 1. Cerrar Menú de Bienvenida (sin usar Escape para no abrir Ajustes)
         print("[WorldBox AI] Intentando cerrar menú de bienvenida...")
         # Forzar foco en la ventana de X11 haciendo clic en una esquina vacía (arriba)
         self.xdo("mousemove", "240", "10", "click", "1")
         time.sleep(0.5)
-        self.xdo("key", "Escape")
-        time.sleep(1.0)
         
         # Barrido de seguridad sobre la "X" roja (Arriba a la izquierda del popup)
-        for cx in range(75, 115, 10):
-            for cy in range(95, 145, 10):
+        # Si el popup no está, solo hará clics inofensivos en el mapa
+        for cx in range(75, 125, 10):
+            for cy in range(95, 155, 10):
                 self.xdo("mousemove", str(cx), str(cy), "click", "1")
                 time.sleep(0.05)
                 
@@ -96,8 +95,6 @@ class WorldboxEngine:
             time.sleep(0.05)
             
         time.sleep(1.0)
-        self.xdo("key", "Escape")
-        time.sleep(2.0)
         
         # 2. Hacer Zoom al mínimo (scroll abajo)
         print("[WorldBox AI] Haciendo zoom al mínimo...")
