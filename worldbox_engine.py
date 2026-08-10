@@ -76,21 +76,25 @@ class WorldboxEngine:
         
         # 1. Cerrar Menú de Bienvenida (con redundancia)
         print("[WorldBox AI] Cerrando menú de bienvenida...")
-        self.xdo("key", "Escape")
+        # El menú de bienvenida tiene un botón CERRAR rojo.
+        # En 480x480 suele estar abajo a la derecha del popup.
+        self.xdo("mousemove", "380", "340", "click", "1")
         time.sleep(1.0)
-        self.xdo("mousemove", "370", "330", "click", "1") # Botón CERRAR
+        self.xdo("mousemove", "380", "340", "click", "1")
         time.sleep(1.0)
-        self.xdo("mousemove", "95", "140", "click", "1")  # Botón X
+        
+        # Por si se abrió la consola de logs (X en la esquina superior izquierda)
+        self.xdo("mousemove", "45", "45", "click", "1") 
         time.sleep(1.0)
-        self.xdo("key", "Escape")
+        self.xdo("mousemove", "45", "45", "click", "1") 
         time.sleep(2.0)
         
         # 2. Hacer Zoom al mínimo (scroll abajo)
         print("[WorldBox AI] Haciendo zoom al mínimo...")
         self.xdo("mousemove", "240", "240")
-        for _ in range(15):
+        for _ in range(25):
             self.xdo("click", "5") # Rueda hacia abajo
-            time.sleep(0.1)
+            time.sleep(0.05)
         time.sleep(1.0)
         
         # Coordenadas UI estimadas en 480x480
