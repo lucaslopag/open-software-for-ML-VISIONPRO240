@@ -7,6 +7,7 @@ from PySide6.QtGui import QImage
 import shimeji_engine
 import terraria_engine
 import ultra_mc_engine
+import github_mc_engine
 import streamlink
 
 FRAME_SIZE = 8 + 480 * 480 * 3 + 8
@@ -65,7 +66,7 @@ class MediaWorker(QThread):
         self.running = True
         
         while self.running:
-            if not self.media_path or (self.media_path not in ['OBS_CAMERA', 'VIRTUAL_PET', 'TERRARIA_AI', 'ULTRA_MC'] and not self.media_path.startswith('http') and not self.media_path.startswith('STREAM:') and not os.path.exists(self.media_path)):
+            if not self.media_path or (self.media_path not in ['OBS_CAMERA', 'VIRTUAL_PET', 'TERRARIA_AI', 'ULTRA_MC', 'GITHUB_MC'] and not self.media_path.startswith('http') and not self.media_path.startswith('STREAM:') and not os.path.exists(self.media_path)):
                 time.sleep(0.1)
                 continue
                 
@@ -106,6 +107,22 @@ class MediaWorker(QThread):
             # --- ULTRA MINECRAFT 2D ---
             elif path == 'ULTRA_MC':
                 engine = ultra_mc_engine.UltraMCEngine(fps=30)
+                engine.start()
+                interval = 1.0 / 30.0
+                
+                while self.running and self.media_path == path:
+                    start_time = time.time()
+                    pil_img = engine.get_frame()
+                    payload, qimage = self.process_pil_frame(pil_img)
+                    self.usb_worker.update_payload(payload)
+                    self.preview_ready.emit(qimage)
+                    elapsed = time.time() - start_time
+                    time.sleep(max(0, interval - elapsed))
+                engine.stop()
+
+            # --- GITHUB MINECRAFT 2D ---
+            elif path == 'GITHUB_MC':
+                engine = github_mc_engine.GithubMCEngine(fps=30)
                 engine.start()
                 interval = 1.0 / 30.0
                 
