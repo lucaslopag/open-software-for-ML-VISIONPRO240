@@ -160,6 +160,20 @@ class OpenMarsApp(QMainWindow):
         terraria_layout.addWidget(btn_info_terraria)
         left_panel.addLayout(terraria_layout)
         
+        mc_layout = QHBoxLayout()
+        btn_mc = QPushButton("⛏️ Minecraft 2D (Avanzado)")
+        btn_mc.setStyleSheet("background-color: #0277bd;") # Blue
+        btn_mc.clicked.connect(self.on_mc_selected)
+        
+        btn_info_mc = QPushButton("ℹ️")
+        btn_info_mc.setStyleSheet("background-color: #555; font-size: 16px; padding: 4px;")
+        btn_info_mc.setFixedWidth(40)
+        btn_info_mc.clicked.connect(self.show_mc_info)
+        
+        mc_layout.addWidget(btn_mc)
+        mc_layout.addWidget(btn_info_mc)
+        left_panel.addLayout(mc_layout)
+        
         self.gallery = QListWidget()
         self.gallery.setViewMode(QListWidget.IconMode)
         self.gallery.setIconSize(QSize(100, 100))
@@ -330,6 +344,16 @@ class OpenMarsApp(QMainWindow):
             "¡Una IA viviendo en tu pantalla sin calentar tu PC en absoluto!"
         )
 
+    def show_mc_info(self):
+        QMessageBox.information(self, "Minecraft 2D (Avanzado)",
+            "¡Un motor Voxel Autónomo Avanzado!\n\n"
+            "- Generación de montañas, valles y sistema de cuevas con minerales (carbón y diamantes).\n"
+            "- Sistema de iluminación dinámica (antorchas) y ciclo Día/Noche (el cielo cambia de color).\n"
+            "- Inteligencia Artificial que explora, pone bloques y se esconde bajo tierra creando antorchas de noche.\n"
+            "- Completamente optimizado para usar <100MB de RAM y nada de GPU.\n\n"
+            "¡Una obra maestra de simulación viviente!"
+        )
+
     def on_pet_selected(self):
         self.gallery.clearSelection()
         self.media_worker.load_media('VIRTUAL_PET')
@@ -337,6 +361,10 @@ class OpenMarsApp(QMainWindow):
     def on_terraria_selected(self):
         self.gallery.clearSelection()
         self.media_worker.load_media('TERRARIA_AI')
+        
+    def on_mc_selected(self):
+        self.gallery.clearSelection()
+        self.media_worker.load_media('ADVANCED_MC')
         
     def on_stream_selected(self):
         url, ok = QInputDialog.getText(self, "Directo (Twitch/YouTube)", "Introduce la URL del directo (ej: https://twitch.tv/ibai):")
